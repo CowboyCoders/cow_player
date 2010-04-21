@@ -14,10 +14,11 @@ main_window::main_window(QWidget *parent) :
     audio_output_(Phonon::VideoCategory, this),
     media_source_(NULL),
     piece_dialog_(this),
-    select_program_dialog_(this),
     settings_dialog_(this),
-    fullscreen_mode_(false)
+    fullscreen_mode_(false),
+    select_program_dialog_(&client_, this)
 {
+
     ui->setupUi(this);
     
 
@@ -182,7 +183,7 @@ void main_window::on_actionFullscreen_triggered()
 
 void main_window::on_actionShow_program_list_triggered()
 {
-    select_program_dialog_.show();
+    //select_program_dialog_.show();
 }
 
 void main_window::on_actionShow_pieces_triggered()

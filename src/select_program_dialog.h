@@ -3,6 +3,9 @@
 
 #include <QDialog>
 
+#include <cow/cow_client.hpp>
+#include <cow/program_info.hpp>
+
 namespace Ui {
     class select_program_dialog;
 }
@@ -10,7 +13,7 @@ namespace Ui {
 class select_program_dialog : public QDialog {
     Q_OBJECT
 public:
-    select_program_dialog(QWidget *parent = 0);
+    select_program_dialog(libcow::cow_client*, QWidget *parent = 0);
     ~select_program_dialog();
 
 protected:
@@ -18,6 +21,9 @@ protected:
 
 private:
     Ui::select_program_dialog *ui;
+    std::list<libcow::program_info> p_info_;
+
+    void populate_table();
 };
 
 #endif // SELECT_PROGRAM_DIALOG_H
