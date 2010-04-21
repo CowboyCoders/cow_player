@@ -14,11 +14,10 @@ main_window::main_window(QWidget *parent) :
     audio_output_(Phonon::VideoCategory, this),
     media_source_(NULL),
     piece_dialog_(this),
+    select_program_dialog_(this),
     settings_dialog_(this),
-    fullscreen_mode_(false),
-    select_program_dialog_(&client_, this)
+    fullscreen_mode_(false)
 {
-
     ui->setupUi(this);
     
 
@@ -99,9 +98,9 @@ main_window::main_window(QWidget *parent) :
         
     //client_.start_logger();
 
-    /*
-    client_.set_download_directory(dl_path);
-    client_.set_bittorrent_port(port_num);
+
+    client_.set_download_directory(".");
+    client_.set_bittorrent_port(12345);
 	//client_.get_program_table();
     client_.register_download_device_factory(
         boost::shared_ptr<libcow::download_device_factory>(
@@ -113,6 +112,7 @@ main_window::main_window(QWidget *parent) :
         "multicast");
 
     std::cout << "starting download" << std::endl;
+    client_.get_program_table();
     libcow::download_control* ctrl = client_.start_download(1);
 
     if(!ctrl) {
@@ -131,7 +131,7 @@ main_window::main_window(QWidget *parent) :
     }
 
     client_.stop_download(1);
-    */
+
 
 
 }
@@ -183,7 +183,7 @@ void main_window::on_actionFullscreen_triggered()
 
 void main_window::on_actionShow_program_list_triggered()
 {
-    //select_program_dialog_.show();
+    select_program_dialog_.show();
 }
 
 void main_window::on_actionShow_pieces_triggered()

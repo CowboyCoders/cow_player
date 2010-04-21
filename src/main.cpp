@@ -30,5 +30,6 @@ int main(int argc, char *argv[])
 	a.setApplicationName( "Cow player" ); //needed for Phonon/ DBUS 
     main_window w;
     w.show();
+
     return a.exec();
 }
