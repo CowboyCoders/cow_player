@@ -103,6 +103,7 @@ set(cow_player_INCLUDES
     ${COW_PLAYER_SOURCE_DIR}/src/configuration.h
     ${COW_PLAYER_SOURCE_DIR}/src/client_configuration.h
     ${COW_PLAYER_SOURCE_DIR}/src/cow_io_device.h
+    ${COW_PLAYER_SOURCE_DIR}/src/list_item.h
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxml.h
 )
 

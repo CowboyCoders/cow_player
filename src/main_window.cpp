@@ -129,7 +129,16 @@ void main_window::on_actionFullscreen_triggered()
 
 void main_window::on_actionShow_program_list_triggered()
 {
+    select_program_dialog_.populate_list();
     select_program_dialog_.show();
+    if(select_program_dialog_.exec() == QDialog::Accepted)
+    {
+        int id = select_program_dialog_.selected_id();
+        if(id != -1)
+        {
+            start_download(".",12345,id);
+        }
+    }
 }
 
 void main_window::on_actionShow_pieces_triggered()
