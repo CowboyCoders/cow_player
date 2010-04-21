@@ -41,14 +41,24 @@ void piece_dialog::set_download_control(libcow::download_control* dctrl){
 
 void piece_dialog::showEvent(QShowEvent* e)
 {
-    std::vector<piece_state> piece_states(10007);
+
+    if(download_ctrl_ != NULL ){
+    libcow::progress_info progress = download_ctrl_->get_progress();
+    std::vector<int> origins = progress.piece_origin();
+    libtorrent::bitfield have_piece = progress.downloaded();
+    std::vector<piece_state> piece_states(origins.size());
     for (size_t i = 0; i < piece_states.size(); i++) {
-        piece_states[i] = static_cast<piece_state>(0 /*rand() % 4*/);
+        if(have_piece[i] == 1) {
+            piece_states[i] = static_cast<piece_state>(origins[i] + 1);
+        } else {
+            piece_states[i] = static_cast<piece_state>(0);
+        }
+
     }
     ui->pieceWidget->set_piece_states(piece_states);
-    ui->pieceWidget->update_piece_state(200, bittorrent);
 
     timer_->start();
+    }
 }
 
 void piece_dialog::debugPieceIndicator()
@@ -61,5 +71,5 @@ void piece_dialog::debugPieceIndicator()
         const std::vector<int>& vec = info.piece_origin();
     }
 
-    ui->pieceWidget->update_piece_state(rand()%10000, static_cast<piece_state>(rand() % 3 + 1));
+    //ui->pieceWidget->update_piece_state(rand()%10000, static_cast<piece_state>(rand() % 3 + 1));
 }
