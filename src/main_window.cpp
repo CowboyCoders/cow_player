@@ -3,6 +3,7 @@
 #include "cow_io_device.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/log/trivial.hpp>
 
 #include <QFile>
 #include <QDir>
@@ -66,12 +67,10 @@ bool main_window::start_download(std::string dir,
     libcow::download_control* ctrl = client_.start_download(movie_id);
 
     if(!ctrl) {
-        std::cerr << "Failed to start download." << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "Failed to start download of movie id: " << movie_id;
         return false;
     } else {
-        ctrl->get_progress();
         piece_dialog_.set_download_control(ctrl);
-        
         return true;
     }
 
@@ -129,15 +128,21 @@ void main_window::on_actionFullscreen_triggered()
 
 void main_window::on_actionShow_program_list_triggered()
 {
-    select_program_dialog_.populate_list();
+    if(!select_program_dialog_.is_populated())
+    {
+        select_program_dialog_.populate_list();
+    }
+    
     select_program_dialog_.show();
+    
     if(select_program_dialog_.exec() == QDialog::Accepted)
     {
         int id = select_program_dialog_.selected_id();
         if(id != -1)
         {
+            BOOST_LOG_TRIVIAL(debug) << "User selected movie id: " << id;
             start_download(".",12345,id);
-        }
+        } 
     }
 }
 

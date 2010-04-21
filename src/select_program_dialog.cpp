@@ -9,7 +9,8 @@ select_program_dialog::select_program_dialog(libcow::cow_client* client, QWidget
     QDialog(parent),
     ui(new Ui::select_program_dialog),
     client_(client),
-    id_(-1)
+    id_(-1),
+    is_populated_(false)
 {
     ui->setupUi(this);
 }
@@ -45,6 +46,8 @@ void select_program_dialog::populate_list(){
         ui->program_list_->insertItem(i,name);
         ++i;
     }
+
+    is_populated_ = true;
 }
 
 void select_program_dialog::on_buttonBox_accepted()
