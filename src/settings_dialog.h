@@ -2,6 +2,7 @@
 #define SETTINGS_DIALOG_H
 
 #include <QDialog>
+#include <cow/cow_client.hpp>
 
 namespace Ui {
     class settings_dialog;
@@ -17,6 +18,7 @@ protected:
     void changeEvent(QEvent *e);
 
 private:
+    libcow::cow_client* client_;
     Ui::settings_dialog *ui;
 };
 
