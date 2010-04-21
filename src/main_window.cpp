@@ -128,6 +128,7 @@ main_window::main_window(QWidget *parent) :
         std::cout << "State: " << progress_info.state_str() 
             << ", Progress: " << (progress_info.progress() * 100.0) 
             << "%" << std::endl;
+        std::cout << "Vector size: " << progress_info.piece_origin().size() << std::endl;
     }
 
     client_.stop_download(1);
