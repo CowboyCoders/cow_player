@@ -27,6 +27,11 @@ protected:
     void changeEvent(QEvent *e);
 
 private:
+    void set_fullscreen(bool fullscreen);
+    bool start_download(std::string dir, int bt_port, int movie_id);
+    void stop_download(int movie_id);
+    void register_download_devices();
+    
     Ui::main_window *ui;
 
     libcow::cow_client client_;
@@ -41,12 +46,7 @@ private:
     Phonon::MediaSource* media_source_;
 
     bool fullscreen_mode_;
-
     
-
-    void set_fullscreen(bool fullscreen);
-
-
 private slots:
     void media_stateChanged();
     void on_stopButton_clicked();

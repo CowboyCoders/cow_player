@@ -10,17 +10,19 @@
 main_window::main_window(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::main_window),
+    client_(),
+    download_ctrl_(0),
+    piece_dialog_(this),
+    select_program_dialog_(&client_, this),
+    settings_dialog_(this),
     media_object_(this),
     audio_output_(Phonon::VideoCategory, this),
     media_source_(NULL),
-    select_program_dialog_(&client_, this),
-    settings_dialog_(this),
-    fullscreen_mode_(false),
-    piece_dialog_(this)
+    fullscreen_mode_(false)
 {
+
     ui->setupUi(this);
     
-
     // Make sure the fullscreen mode menu is checked correctly
     ui->actionFullscreen->setChecked(fullscreen_mode_);
 
@@ -37,108 +39,47 @@ main_window::main_window(QWidget *parent) :
     // Connect UI gauges
     ui->seekSlider->setMediaObject(&media_object_);
     ui->volumeSlider->setAudioOutput(&audio_output_);
-
-
-
-
-#if 0
-    // Filename to optional auto-loaded movie
-    std::string mediaPath;
-
-#ifdef WIN32
-    QStringList args = QApplication::arguments();
-    if (args.length() == 2) {
-        mediaPath = args[1].toAscii().data();
-    }
-#else
-    mediaPath = QDir::homePath() + tr("/Videos/big_buck_bunny_480p_h264.mov");
-#endif
-
-    // Create a mock IODevice
-	QIODevice* iod = new mock_io_device(ctrl);
-
-    if (iod->open(QIODevice::ReadOnly)) {
-        // Create a new media source
-        media_source_ = new Phonon::MediaSource(iod);
-        // Auto-play
-        media_object_.setCurrentSource(*media_source_);
-        media_object_.play();
-    }
-
-
-#endif
-
-	//START COW CLIENT HOORAY
-	client_.start_logger();
-    /*
-	client_.set_download_directory(".");
-	client_.set_bittorrent_port(12345);
-	client_.get_program_table();
-	client_.register_download_device_factory(
-       boost::shared_ptr<libcow::download_device_factory>(
-           new libcow::on_demand_server_connection_factory()), 
-       "http");
-   client_.register_download_device_factory(
-       boost::shared_ptr<libcow::download_device_factory>(
-           new libcow::multicast_server_connection_factory()),
-       "multicast");
-       */
-   /*
-   download_ctrl_ = client_.start_download(1); // FETCH BIG FUCK BUN-BUN
-
-    // Create a mock IODevice
-	cow_io_device* cow_iod = new cow_io_device(download_ctrl_);
-    */
-
-    // Create a new media source
-//    media_source_ = new Phonon::MediaSource(cow_iod);
-
-    // Auto-play
-    /*
-    media_object_.setCurrentSource(*media_source_);
-    media_object_.play();
-    */
-        
-    //client_.start_logger();
-
-
-    client_.set_download_directory(".");
-    client_.set_bittorrent_port(12345);
-	//client_.get_program_table();
+}
+   
+void main_window::register_download_devices()
+{
     client_.register_download_device_factory(
         boost::shared_ptr<libcow::download_device_factory>(
             new libcow::on_demand_server_connection_factory()), 
         "http");
+    
     client_.register_download_device_factory(
         boost::shared_ptr<libcow::download_device_factory>(
             new libcow::multicast_server_connection_factory()),
         "multicast");
+}
 
-    std::cout << "starting download" << std::endl;
-    client_.get_program_table();
-    libcow::download_control* ctrl = client_.start_download(1);
-
+bool main_window::start_download(std::string dir, 
+                                 int bt_port, 
+                                 int movie_id)
+{
+	client_.start_logger();
+    client_.set_download_directory(dir);
+    client_.set_bittorrent_port(bt_port);
+    register_download_devices();
+    
+    libcow::download_control* ctrl = client_.start_download(movie_id);
 
     if(!ctrl) {
         std::cerr << "Failed to start download." << std::endl;
-        QApplication::exit(-1);
+        return false;
     } else {
-        std::cout << "keso: " << (ctrl != NULL) << std::endl;
-       //ctrl->get_progress();
-    }
-/*
-    while(true) {
-		
-		libcow::progress_info progress_info = ctrl->get_progress();
-        std::cout << "State: " << progress_info.state_str() 
-            << ", Progress: " << (progress_info.progress() * 100.0) 
-            << "%" << std::endl;
+        ctrl->get_progress();
+        piece_dialog_.set_download_control(ctrl);
+        
+        return true;
     }
 
-    client_.stop_download(1);
-*/
+}
 
-    piece_dialog_.set_download_control(ctrl);
+void main_window::stop_download(int movie_id)
+{
+    client_.stop_download(movie_id);
 }
 
 main_window::~main_window()

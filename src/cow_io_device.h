@@ -2,11 +2,10 @@
 #define ___cow_io_device_h___
 
 #include <QIODevice>
-
 #include <cow/cow.hpp>
 
-#ifdef WIN32 && _DEBUG
-#include <Windows.h>
+#if defined(WIN32) && defined(_DEBUG)
+    #include <Windows.h>
 #endif
 
 class cow_io_device : public QIODevice
@@ -42,7 +41,7 @@ public:
 #if WIN32 && _DEBUG
         ::OutputDebugString("size()\n");
 #endif
-        return 100000000000;
+        return 100000;
     }
 
     virtual bool seek(qint64 pos)
@@ -59,7 +58,7 @@ public:
 
     virtual qint64 readData(char *data, qint64 maxlen)
     {
-#ifdef WIN32 && _DEBUG
+#if defined(WIN32) && defined(_DEBUG)
         static char buf[128];
         sprintf(buf, "read() : %d\n", maxlen);
         ::OutputDebugString(buf);

@@ -13,17 +13,17 @@ namespace Ui {
 class select_program_dialog : public QDialog {
     Q_OBJECT
 public:
-    select_program_dialog(libcow::cow_client*, QWidget *parent = 0);
+    select_program_dialog(libcow::cow_client* client, QWidget *parent = 0);
     ~select_program_dialog();
 
 protected:
     void changeEvent(QEvent *e);
 
 private:
-    Ui::select_program_dialog *ui;
-    std::list<libcow::program_info> p_info_;
-
     void populate_table();
+    
+    Ui::select_program_dialog *ui;
+    libcow::cow_client* client_;
 };
 
 #endif // SELECT_PROGRAM_DIALOG_H
