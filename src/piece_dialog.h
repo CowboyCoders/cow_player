@@ -27,6 +27,7 @@ private:
     QTimer* timer_;
 
 private slots:
+    void pieceIndicator();
     void debugPieceIndicator();
 
 };

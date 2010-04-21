@@ -11,9 +11,9 @@ piece_dialog::piece_dialog(QWidget *parent , libcow::download_control* dctrl) :
     ui->setupUi(this);
 
      timer_ = new QTimer(this);
-     timer_->setInterval(10);
+     timer_->setInterval(100);
 
-     connect(timer_, SIGNAL(timeout()), this, SLOT(debugPieceIndicator()));
+     connect(timer_, SIGNAL(timeout()), this, SLOT(pieceIndicator()));
 }
 
 piece_dialog::~piece_dialog()
@@ -41,7 +41,10 @@ void piece_dialog::set_download_control(libcow::download_control* dctrl){
 
 void piece_dialog::showEvent(QShowEvent* e)
 {
-
+    pieceIndicator();
+}
+void piece_dialog::pieceIndicator()
+{
     if(download_ctrl_ != NULL ){
     libcow::progress_info progress = download_ctrl_->get_progress();
     std::vector<int> origins = progress.piece_origin();
@@ -69,6 +72,7 @@ void piece_dialog::debugPieceIndicator()
         libcow::progress_info info = download_ctrl_->get_progress();
         std::cout << "progress: " << info.progress() << std::endl;
         const std::vector<int>& vec = info.piece_origin();
+        //showEvent(0);
     }
 
     //ui->pieceWidget->update_piece_state(rand()%10000, static_cast<piece_state>(rand() % 3 + 1));

@@ -167,7 +167,7 @@ void piece_widget::paintEvent(QPaintEvent* e)
     QColor ondemand_color(255, 200, 0);
     QColor multicast_color(255, 0, 150);
 
-    QColor brushes[]= { missing_color, bittorrent_color, ondemand_color, multicast_color };
+    QColor brushes[]= { missing_color, bittorrent_color, multicast_color, ondemand_color  };
 
     // Unset repaint flags and timer
     repaint_needed_ = false;
