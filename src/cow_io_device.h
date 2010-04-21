@@ -25,7 +25,7 @@ public:
     }
 
     virtual bool reset(){
-#if WIN32 && _DEBUG
+#if  WIN32 && _DEBUG
         ::OutputDebugString("reset()\n");
 #endif
         return true;

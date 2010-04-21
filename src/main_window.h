@@ -29,6 +29,9 @@ protected:
 private:
     Ui::main_window *ui;
 
+    libcow::cow_client client_;
+	libcow::download_control* download_ctrl_;
+	
     piece_dialog piece_dialog_;
     select_program_dialog select_program_dialog_;
     settings_dialog settings_dialog_;
@@ -39,8 +42,7 @@ private:
 
     bool fullscreen_mode_;
 
-    libcow::cow_client client_;
-	libcow::download_control* download_ctrl_;
+    
 
     void set_fullscreen(bool fullscreen);
 

@@ -1,9 +1,12 @@
 #include "piece_dialog.h"
 #include "ui_piece_dialog.h"
+#include <cow/cow.hpp>
+#include <stdio.h>
 
-piece_dialog::piece_dialog(QWidget *parent) :
+piece_dialog::piece_dialog(QWidget *parent , libcow::download_control* dctrl) :
     QDialog(parent),
-    ui(new Ui::piece_dialog)
+    ui(new Ui::piece_dialog),
+    download_ctrl_(dctrl)
 {
     ui->setupUi(this);
 
@@ -16,6 +19,7 @@ piece_dialog::piece_dialog(QWidget *parent) :
 piece_dialog::~piece_dialog()
 {
     delete ui;
+    delete timer_;
 }
 
 void piece_dialog::changeEvent(QEvent *e)
@@ -28,6 +32,11 @@ void piece_dialog::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+
+void piece_dialog::set_download_control(libcow::download_control* dctrl){
+    download_ctrl_ = dctrl;
+
 }
 
 void piece_dialog::showEvent(QShowEvent* e)
@@ -44,5 +53,13 @@ void piece_dialog::showEvent(QShowEvent* e)
 
 void piece_dialog::debugPieceIndicator()
 {    
+    if(download_ctrl_ != NULL ){
+        std::cout << "update progress " << download_ctrl_->piece_length() << std::endl;
+        //download_ctrl_->get_progress();
+        libcow::progress_info info = download_ctrl_->get_progress();
+        std::cout << "progress: " << info.progress() << std::endl;
+        const std::vector<int>& vec = info.piece_origin();
+    }
+
     ui->pieceWidget->update_piece_state(rand()%10000, static_cast<piece_state>(rand() % 3 + 1));
 }

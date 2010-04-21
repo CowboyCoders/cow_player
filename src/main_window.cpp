@@ -13,12 +13,11 @@ main_window::main_window(QWidget *parent) :
     media_object_(this),
     audio_output_(Phonon::VideoCategory, this),
     media_source_(NULL),
-    piece_dialog_(this),
+    select_program_dialog_(&client_, this),
     settings_dialog_(this),
     fullscreen_mode_(false),
-    select_program_dialog_(&client_, this)
+    piece_dialog_(this)
 {
-
     ui->setupUi(this);
     
 
@@ -38,6 +37,9 @@ main_window::main_window(QWidget *parent) :
     // Connect UI gauges
     ui->seekSlider->setMediaObject(&media_object_);
     ui->volumeSlider->setAudioOutput(&audio_output_);
+
+
+
 
 #if 0
     // Filename to optional auto-loaded movie
@@ -116,13 +118,15 @@ main_window::main_window(QWidget *parent) :
     client_.get_program_table();
     libcow::download_control* ctrl = client_.start_download(1);
 
+
     if(!ctrl) {
         std::cerr << "Failed to start download." << std::endl;
         QApplication::exit(-1);
+    } else {
+        std::cout << "keso: " << (ctrl != NULL) << std::endl;
+       //ctrl->get_progress();
     }
-
-    ctrl->get_progress();
-	
+/*
     while(true) {
 		
 		libcow::progress_info progress_info = ctrl->get_progress();
@@ -132,9 +136,9 @@ main_window::main_window(QWidget *parent) :
     }
 
     client_.stop_download(1);
+*/
 
-
-
+    piece_dialog_.set_download_control(ctrl);
 }
 
 main_window::~main_window()
@@ -184,7 +188,7 @@ void main_window::on_actionFullscreen_triggered()
 
 void main_window::on_actionShow_program_list_triggered()
 {
-    //select_program_dialog_.show();
+    select_program_dialog_.show();
 }
 
 void main_window::on_actionShow_pieces_triggered()
