@@ -2,7 +2,7 @@
 #define SETTINGS_DIALOG_H
 
 #include <QDialog>
-#include <cow/cow_client.hpp>
+#include <cow/cow.hpp>
 
 namespace Ui {
     class settings_dialog;

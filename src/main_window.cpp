@@ -44,6 +44,7 @@ main_window::main_window(QWidget *parent) :
    
 void main_window::register_download_devices()
 {
+
     client_.register_download_device_factory(
         boost::shared_ptr<libcow::download_device_factory>(
             new libcow::on_demand_server_connection_factory()), 

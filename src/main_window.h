@@ -4,7 +4,6 @@
 #include "piece_dialog.h"
 #include "select_program_dialog.h"
 #include "settings_dialog.h"
-#include "cow/cow.hpp"
 
 #include <QtGui/QMainWindow>
 

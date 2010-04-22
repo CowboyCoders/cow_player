@@ -3,8 +3,7 @@
 
 #include <QDialog>
 
-#include <cow/cow_client.hpp>
-#include <cow/program_info.hpp>
+#include <cow/cow.hpp>
 
 
 namespace Ui {

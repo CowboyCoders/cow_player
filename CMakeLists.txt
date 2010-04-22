@@ -3,9 +3,11 @@ cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_BUILD_TYPE Debug)  
 
-# Use static MT version of Boost
-SET(Boost_USE_STATIC_LIBS ON)
-SET(Boost_USE_MULTITHREAD ON)
+if(WIN32)
+    # Use static MT version of Boost
+    SET(Boost_USE_STATIC_LIBS ON)
+    SET(Boost_USE_MULTITHREAD ON)
+endif(WIN32)
 
 find_package(Boost COMPONENTS system thread log filesystem REQUIRED)
 find_package(Qt4 REQUIRED)
@@ -152,7 +154,10 @@ if(WIN32)
     target_link_libraries(cow_player    
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_THREAD_LIBRARY}
+        ${Boost_LOG_LIBRARY}
+        ${Boost_FILESYSTEM_LIBRARY}
         ${QT_LIBRARIES}
+        
         ws2_32
         winmm
         wldap32
