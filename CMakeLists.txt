@@ -165,11 +165,9 @@ if(WIN32)
         torrent
         
         debug qtmaind
-        debug libcurl
         debug cowd
             
         optimized qtmain
-        optimized libcurl
         optimized cow
     )
     

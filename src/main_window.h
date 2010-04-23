@@ -40,8 +40,8 @@ private:
     select_program_dialog select_program_dialog_;
     settings_dialog settings_dialog_;
 
-    Phonon::MediaObject media_object_;
-    Phonon::AudioOutput audio_output_;
+    Phonon::MediaObject* media_object_;
+    Phonon::AudioOutput* audio_output_;
     Phonon::MediaSource* media_source_;
 
     bool fullscreen_mode_;
@@ -56,6 +56,10 @@ private slots:
     void on_actionSettings_triggered();
     void on_actionExit_triggered();
     void leaveFullscreen_triggered();
+
+    void tick(qint64 time);
+    void buffer_status(int percent_filled);
+    void total_time_changed(qint64 total_time);
     
 };
 
