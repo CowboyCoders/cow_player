@@ -5,11 +5,10 @@
 #include "list_item.h"
 
 
-select_program_dialog::select_program_dialog(libcow::cow_client* client, QWidget *parent) :
+select_program_dialog::select_program_dialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::select_program_dialog),
-    client_(client),
-    id_(-1),
+    selected_program_index_(-1),
     is_populated_(false)
 {
     ui->setupUi(this);
@@ -32,19 +31,17 @@ void select_program_dialog::changeEvent(QEvent *e)
     }
 }
 
-void select_program_dialog::populate_list(){
-    std::list<libcow::program_info> p_info = client_->get_program_table();
-    std::list<libcow::program_info>::iterator it;
+void select_program_dialog::populate_list() 
+{
+    ui->program_list_->clear();
 
-    list_item* name;
-    int i = 0;
-    for(it = p_info.begin(); it != p_info.end(); it++){
+    if (!prog_table_.load_from_http(program_table_url_))
+        return;
+
+    libcow::program_table::iterator it = prog_table_.begin();
+    for (; it != prog_table_.end(); ++it) {
         QString movie_name(it->name.c_str());
-        name = new list_item(it->id,it->name);
-        name->setText(movie_name);
-
-        ui->program_list_->insertItem(i,name);
-        ++i;
+        ui->program_list_->addItem(movie_name);
     }
 
     is_populated_ = true;
@@ -53,10 +50,9 @@ void select_program_dialog::populate_list(){
 void select_program_dialog::on_buttonBox_accepted()
 {
     int row = ui->program_list_->currentRow();
-    QListWidgetItem* item = ui->program_list_->item(row);
 
-    if(list_item* li = dynamic_cast<list_item*>(item)) {
-        id_ = li->id();
+    if (row > -1) {
+        selected_program_index_ = row;
         accept();
     }
 }

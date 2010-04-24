@@ -5,7 +5,7 @@ const std::string configuration_property_tag_name = "property";
 const std::string configuration_property_name_attribute = "name";
 const std::string configuration_property_type_attribute = "type";
 
-using namespace cow_player::configuration;
+using namespace cowplayer::configuration;
 
 base_configuration::base_configuration()
 {

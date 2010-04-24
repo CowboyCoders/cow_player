@@ -34,15 +34,17 @@ void piece_dialog::changeEvent(QEvent *e)
     }
 }
 
-void piece_dialog::set_download_control(libcow::download_control* dctrl){
+void piece_dialog::set_download_control(libcow::download_control* dctrl)
+{
     download_ctrl_ = dctrl;
-
+    pieceIndicator();
 }
 
 void piece_dialog::showEvent(QShowEvent* e)
 {
     pieceIndicator();
 }
+
 void piece_dialog::pieceIndicator()
 {
     if(download_ctrl_ != NULL ){

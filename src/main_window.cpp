@@ -8,20 +8,21 @@
 #include <QFile>
 #include <QDir>
 
+const std::string config_filename = "config.cfg";
+
 main_window::main_window(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::main_window),
     client_(),
     download_ctrl_(0),
     piece_dialog_(this),
-    select_program_dialog_(&client_, this),
+    select_program_dialog_(this),
     settings_dialog_(this),
-    media_object_(NULL),
-    audio_output_(NULL),
-    media_source_(NULL),
+    media_object_(0),
+    audio_output_(0),
+    media_source_(0),
     fullscreen_mode_(false)
 {
-
     ui->setupUi(this);
     
     // Make sure the fullscreen mode menu is checked correctly
@@ -30,15 +31,12 @@ main_window::main_window(QWidget *parent) :
     media_object_ = new Phonon::MediaObject(this);
     audio_output_ = new Phonon::AudioOutput(Phonon::VideoCategory, this);
 
-
     // Bind events
     connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(media_stateChanged()));
     //connect(media_object_, SIGNAL(bufferStatus(int)), this, SLOT(buffer_status(int)));
     //connect(media_object_, SIGNAL(totalTimeChanged (qint64)), this, SLOT(total_time_changed(qint64)));
     //connect(media_object_, SIGNAL(tick (qint64)), this, SLOT(tick(qint64)));
     connect(ui->videoPlayer, SIGNAL(leaveFullscreen()), this, SLOT(leaveFullscreen_triggered()));
-
-    this->statusBar()->showMessage(tr("Cowtastic!"));
 
     // Connect the media object with both VideoWidget and the AudioOutput
     Phonon::createPath(media_object_, ui->videoPlayer);
@@ -48,6 +46,21 @@ main_window::main_window(QWidget *parent) :
     ui->seekSlider->setMediaObject(media_object_);
     ui->volumeSlider->setAudioOutput(audio_output_);
 
+    // Load client configuration
+	try {
+        config_.load(config_filename);
+	} catch (cowplayer::configuration::exceptions::load_config_error e) {
+        BOOST_LOG_TRIVIAL(warning) << "cow_player: could not open config file!";
+	}
+
+    // Init client
+  	client_.start_logger();
+    client_.set_download_directory(config_.get_download_dir());
+    client_.set_bittorrent_port(config_.get_bittorrent_port());
+    register_download_devices();
+
+    // It's COWTASTIC!
+    statusBar()->showMessage(tr("Cowtastic!"));
 }
    
 void main_window::register_download_devices()
@@ -63,57 +76,41 @@ void main_window::register_download_devices()
         "multicast");
 }
 
-bool main_window::start_download(std::string dir, 
-                                 int bt_port, 
-                                 int movie_id)
+bool main_window::start_download(const libcow::program_info& program_info)
 {
-	client_.start_logger();
-    client_.set_download_directory(dir);
-    client_.set_bittorrent_port(bt_port);
-    register_download_devices();
-    
-    libcow::download_control* ctrl = client_.start_download(movie_id);
-
-    if (media_source_) {
-        delete media_source_;
+    assert(download_ctrl_ == 0);
+    assert(media_source_ == 0);
+   
+    download_ctrl_ = client_.start_download(program_info);
+    if (!download_ctrl_) {
+        BOOST_LOG_TRIVIAL(error) << "cow_player: Could not play program.";
+        return false;
     }
 
     std::vector<libcow::piece_request> reqs;
-    reqs.push_back(libcow::piece_request(ctrl->piece_length(),0,10));
-    reqs.push_back(libcow::piece_request(ctrl->piece_length(),10,10));
-    //reqs.push_back(libcow::piece_request(ctrl->piece_length(),20,10));
-    reqs.push_back(libcow::piece_request(ctrl->piece_length(),569,4));
-    ctrl->pre_buffer(reqs);
+    reqs.push_back(libcow::piece_request(download_ctrl_->piece_length(),0,10));
+    reqs.push_back(libcow::piece_request(download_ctrl_->piece_length(),569,4));
+    download_ctrl_->pre_buffer(reqs);
 
-    //libcow::system::sleep(10000);
+    piece_dialog_.set_download_control(download_ctrl_);
 
-    media_source_ = new Phonon::MediaSource(new cow_io_device(ctrl));
+    media_source_ = new Phonon::MediaSource(new cow_io_device(media_object_, download_ctrl_));
     media_object_->setCurrentSource(*media_source_);
-    //media_object_->enqueue(*media_source_);
-
-    
+   
     media_object_->play();
 
-
-    if(!ctrl) {
-        BOOST_LOG_TRIVIAL(error) << "Failed to start download of movie id: " << movie_id;
-        return false;
-    } else {
-        piece_dialog_.set_download_control(ctrl);
-        return true;
-    }
-
+    return true;
 }
 
-void main_window::stop_download(int movie_id)
+void main_window::stop_download()
 {
-    client_.stop_download(movie_id);
+    if (download_ctrl_) {
+        client_.remove_download(download_ctrl_);
+    }
 }
 
 main_window::~main_window()
 {
-    client_.stop_download(1);
-    media_object_->stop();
     delete media_source_;
     delete ui;
 }
@@ -145,6 +142,23 @@ void main_window::changeEvent(QEvent *e)
     }
 }
 
+void main_window::closeEvent(QCloseEvent* e)
+{
+    media_object_->stop();
+    e->accept();
+    /*
+    if (media_object_->state() == Phonon::PlayingState || 
+        media_object_->state() == Phonon::LoadingState) 
+    {
+        media_object_->stop();
+        e->ignore();
+        QTimer::singleShot(250, this, SLOT(close()));
+    } else {
+        e->accept();
+    }
+    */
+}
+
 void main_window::on_actionExit_triggered()
 {
     QApplication::quit();
@@ -157,20 +171,17 @@ void main_window::on_actionFullscreen_triggered()
 
 void main_window::on_actionShow_program_list_triggered()
 {
-    if(!select_program_dialog_.is_populated())
-    {
+    if(!select_program_dialog_.is_populated()) {
+        select_program_dialog_.set_program_table_url(config_.get_program_table_url());
         select_program_dialog_.populate_list();
     }
     
     select_program_dialog_.show();
     
-    if(select_program_dialog_.exec() == QDialog::Accepted)
-    {
-        int id = select_program_dialog_.selected_id();
-        if(id != -1)
-        {
-            BOOST_LOG_TRIVIAL(debug) << "User selected movie id: " << id;
-            start_download(".",12345,id);
+    if(select_program_dialog_.exec() == QDialog::Accepted) {
+        const libcow::program_info* program = select_program_dialog_.selected_program();
+        if(program) {
+            start_download(*program);
         } 
     }
 }
@@ -211,15 +222,12 @@ void main_window::on_playButton_clicked()
         media_object_->play();
     } else {
         this->statusBar()->showMessage(media_object_->errorString() );
-        //media_object_->play();
     }
 }
 
 void main_window::on_stopButton_clicked()
 {
     media_object_->stop();
-    //media_object_->pause();
-    //media_object_->seek(0);
 }
 
 void main_window::buffer_status(int percent_filled)

@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace cow_player {
+namespace cowplayer {
 
 class client_configuration
     : public configuration::base_configuration
@@ -16,7 +16,9 @@ public:
         : configuration::base_configuration(fileName) {}
 
     CONFIGURATION_PROPERTY(fullscreen, bool, false);
-    CONFIGURATION_PROPERTY(hello, std::string, "abc");
+    CONFIGURATION_PROPERTY(program_table_url, std::string, "");
+    CONFIGURATION_PROPERTY(bittorrent_port, int, 23454);
+    CONFIGURATION_PROPERTY(download_dir, std::string, ".");
 };
 
 }

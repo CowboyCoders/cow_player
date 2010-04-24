@@ -4,8 +4,10 @@
 #include "piece_dialog.h"
 #include "select_program_dialog.h"
 #include "settings_dialog.h"
+#include "client_configuration.h"
 
 #include <QtGui/QMainWindow>
+#include <QCloseEvent>
 
 /* phonon with a capital "P" breaks ubuntu make */
 #include <phonon>
@@ -23,15 +25,18 @@ public:
     ~main_window();
 
 protected:
-    void changeEvent(QEvent *e);
+    void changeEvent(QEvent* e);
+    void closeEvent(QCloseEvent* e);
 
 private:
     void set_fullscreen(bool fullscreen);
-    bool start_download(std::string dir, int bt_port, int movie_id);
-    void stop_download(int movie_id);
+    bool start_download(const libcow::program_info& program_info);
+    void stop_download();
     void register_download_devices();
     
     Ui::main_window *ui;
+
+    cowplayer::client_configuration config_;
 
     libcow::cow_client client_;
 	libcow::download_control* download_ctrl_;

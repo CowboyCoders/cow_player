@@ -8,7 +8,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace cow_player {
+namespace cowplayer {
 namespace configuration {
 
 namespace exceptions {

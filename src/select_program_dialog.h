@@ -23,7 +23,7 @@ public:
      * @param cow_client A pointer to client which the main application uses
      * @param parent A pointer to the creator of the window
      */
-    select_program_dialog(libcow::cow_client* client, QWidget *parent = 0);
+    select_program_dialog(QWidget *parent = 0);
     ~select_program_dialog();
 
     /**
@@ -32,15 +32,9 @@ public:
      */
     void populate_list();
     
-    /**
-     * Returns which movie id the user selected in the list,
-     * or -1 if the user didn't select anything.
-     *
-     * @return the movie id, otherwise -1
-     */
-    int selected_id()
+    const libcow::program_info* selected_program()
     {
-        return id_;
+        return selected_program_index_ > -1 ? &prog_table_.at(selected_program_index_) : 0;
     }
 
     /**
@@ -53,14 +47,20 @@ public:
         return is_populated_;
     }
 
+    void set_program_table_url(const std::string& url) { program_table_url_ = url; }
 
 protected:
     void changeEvent(QEvent *e);
 
 private:
     Ui::select_program_dialog *ui;
-    libcow::cow_client* client_;
-    int id_;
+
+    libcow::program_table prog_table_;
+
+    std::string program_table_url_;
+
+    int selected_program_index_;
+
     bool is_populated_;
 
 private slots:
