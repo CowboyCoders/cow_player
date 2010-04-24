@@ -1,6 +1,5 @@
 #include "main_window.h"
 #include "ui_main_window.h"
-#include "cow_io_device.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/log/trivial.hpp>
@@ -21,9 +20,14 @@ main_window::main_window(QWidget *parent) :
     media_object_(0),
     audio_output_(0),
     media_source_(0),
-    fullscreen_mode_(false)
+    fullscreen_mode_(false),
+    iodevice_(0)
 {
     ui->setupUi(this);
+
+    //buffer_indicator_ = new QSvgWidget("spinner.svg", this);
+    //ui->verticalLayout_2->addWidget(buffer_indicator_);
+    //ui->videoFrame->layout()->addWidget(buffer_indicator_);
     
     // Make sure the fullscreen mode menu is checked correctly
     ui->actionFullscreen->setChecked(fullscreen_mode_);
@@ -94,9 +98,13 @@ bool main_window::start_download(const libcow::program_info& program_info)
 
     piece_dialog_.set_download_control(download_ctrl_);
 
-    media_source_ = new Phonon::MediaSource(new cow_io_device(media_object_, download_ctrl_));
+    iodevice_ = new cow_io_device(media_object_, download_ctrl_);
+
+    media_source_ = new Phonon::MediaSource(iodevice_);
     media_object_->setCurrentSource(*media_source_);
    
+    statusBar()->showMessage("Loading...");
+
     media_object_->play();
 
     return true;
@@ -144,15 +152,19 @@ void main_window::changeEvent(QEvent *e)
 
 void main_window::closeEvent(QCloseEvent* e)
 {
-    media_object_->stop();
-    e->accept();
-    /*
-    if (media_object_->state() == Phonon::PlayingState || 
-        media_object_->state() == Phonon::LoadingState) 
-    {
+    if (iodevice_) {
         media_object_->stop();
+        iodevice_->shutdown();
+    }
+
+    e->accept();
+
+    /*
+
+
+        QTimer::singleShot(100, this, SLOT(close()));
+
         e->ignore();
-        QTimer::singleShot(250, this, SLOT(close()));
     } else {
         e->accept();
     }
@@ -201,27 +213,41 @@ void main_window::leaveFullscreen_triggered()
     set_fullscreen(false);
 }
 
-void main_window::media_stateChanged(){
-    if(media_object_->state()==Phonon::PlayingState){
+void main_window::media_stateChanged()
+{
+    bool buffering = iodevice_ && iodevice_->is_buffering();
+
+    if (media_object_->state()==Phonon::LoadingState) {
+        statusBar()->showMessage("Loading...");
+    } else if (media_object_->state()==Phonon::PlayingState) {
         ui->playButton->setText("Pause");
-    }else if(media_object_->state()==Phonon::ErrorState){
-		this->statusBar()->showMessage(media_object_->errorString() );
-    }else{
+    } else if(media_object_->state() == Phonon::StoppedState) {
         ui->playButton->setText("Play");
+    } else if(media_object_->state()==Phonon::ErrorState) {
+		this->statusBar()->showMessage(media_object_->errorString());
+    } else if (media_object_->state()==Phonon::PausedState) {
+        if (buffering) {
+            ui->playButton->setText("Pause");
+            statusBar()->showMessage("Buffering...");
+        } else {
+            ui->playButton->setText("Play");
+        }
     }
 }
 
 void main_window::on_playButton_clicked()
 {
+    bool buffering = iodevice_ && iodevice_->is_buffering();
+
     Phonon::State s = media_object_->state();
-    if(media_object_->state()==Phonon::PlayingState){
+    if (media_object_->state() == Phonon::PlayingState){
         media_object_->pause();
-    }else if(media_object_->state() == Phonon::PausedState){
+    } else if (media_object_->state() == Phonon::StoppedState) {
         media_object_->play();
-    }else if(media_object_->state() == Phonon::StoppedState){
+    } else if (media_object_->state() == Phonon::PausedState && !buffering) {
         media_object_->play();
-    } else {
-        this->statusBar()->showMessage(media_object_->errorString() );
+    } else if (media_object_->state()==Phonon::ErrorState) {
+        statusBar()->showMessage(media_object_->errorString());
     }
 }
 

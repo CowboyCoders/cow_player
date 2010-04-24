@@ -14,6 +14,7 @@ find_package(Qt4 REQUIRED)
 
 # see http://cmake.org/cmake/help/cmake2.6docs.html#module:FindQt4 for a complete list
 set(QT_USE_PHONON TRUE)
+set(QT_USE_QTSVG TRUE)
 
 if(UNIX)
     ####################### IMPORTANT ###########################

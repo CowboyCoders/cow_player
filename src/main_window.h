@@ -5,9 +5,11 @@
 #include "select_program_dialog.h"
 #include "settings_dialog.h"
 #include "client_configuration.h"
+#include "cow_io_device.h"
 
 #include <QtGui/QMainWindow>
 #include <QCloseEvent>
+#include <QSvgWidget>
 
 /* phonon with a capital "P" breaks ubuntu make */
 #include <phonon>
@@ -36,10 +38,14 @@ private:
     
     Ui::main_window *ui;
 
+    QSvgWidget* buffer_indicator_;
+
     cowplayer::client_configuration config_;
 
     libcow::cow_client client_;
 	libcow::download_control* download_ctrl_;
+
+    cow_io_device* iodevice_;
 	
     piece_dialog piece_dialog_;
     select_program_dialog select_program_dialog_;
