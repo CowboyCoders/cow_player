@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <info>
-<bittorrent_port>
-23454
-</bittorrent_port>
-<download_dir>
+<property name="bittorrent_port" type="int">
+55678
+</property>
+<property name="download_dir" type="path">
 .
-</download_dir>
-<program_table_url>
-cowboycoders.se/program_table.xml
-</program_table_url>
+</property>
+<property name="program_table_url" type="url">
+    cowboycoders.se/program_table.xml
+</property>
 </info>
