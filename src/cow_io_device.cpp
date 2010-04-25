@@ -52,9 +52,14 @@ qint64 cow_io_device::size() const
 bool cow_io_device::seek(qint64 pos)
 {
     BOOST_LOG_TRIVIAL(debug) << "seek() : offset " << pos;
+    if(pos > size_) {
+        return false;
+    } 
+    
     return QIODevice::seek(pos);
 }
 
+/*
 qint64 cow_io_device::bytesAvailable() const
 {
     boost::mutex::scoped_lock lock(shutdown_mutex_);
@@ -68,7 +73,14 @@ qint64 cow_io_device::bytesAvailable() const
 
     return len;
 }
+*/
 
+qint64 cow_io_device::bytesAvailable() const
+{
+    qint64 len = QIODevice::bytesAvailable(); 
+    BOOST_LOG_TRIVIAL(debug) << "bytesAvailable() : result " << len;
+    return len; 
+}
 qint64 cow_io_device::readData(char *data, qint64 maxlen)
 {
     /*
@@ -93,9 +105,11 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
 
     // Prioritize pieces in libcow
     download_control_->set_playback_position(pos());
-
+    
     bool has_data = download_control_->has_data(pos(), maxlen);
-
+    BOOST_LOG_TRIVIAL(debug) << "cow_io_device::readData: "
+                             << "pos: " << pos() << " maxlen: "
+                             << maxlen << " has_data: " << has_data;
     if (!has_data) {
 
         {   // Update buffering flag
@@ -121,7 +135,6 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
                 return 0;
             }
 
-
             done = download_control_->has_data(pos(), maxlen);
 
             shutdown_mutex_.unlock();
@@ -139,7 +152,7 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
     }
 
     libcow::utils::buffer buf(data, maxlen);
-    qint64 len = download_control_->read_data(pos(), buf);
+    size_t len = download_control_->read_data(pos(), buf);
 
     shutdown_mutex_.unlock();
 
