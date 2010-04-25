@@ -97,6 +97,7 @@ set(cow_player_SRCS
     ${COW_PLAYER_SOURCE_DIR}/src/video_player.cpp    
     ${COW_PLAYER_SOURCE_DIR}/src/configuration.cpp
     ${COW_PLAYER_SOURCE_DIR}/src/client_configuration.cpp
+    ${COW_PLAYER_SOURCE_DIR}/src/cow_io_device.cpp
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxml.cpp
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxmlerror.cpp
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxmlparser.cpp
