@@ -34,7 +34,12 @@ public:
     
     const libcow::program_info* selected_program()
     {
-        return selected_program_index_ > -1 ? &prog_table_.at(selected_program_index_) : 0;
+        if(connected_ && selected_program_index_ >= 0)
+        {
+            return &prog_table_.at(selected_program_index_);
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -62,6 +67,7 @@ private:
     int selected_program_index_;
 
     bool is_populated_;
+    bool connected_;
 
 private slots:
     void on_buttonBox_accepted();

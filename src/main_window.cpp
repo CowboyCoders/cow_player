@@ -7,7 +7,7 @@
 #include <QFile>
 #include <QDir>
 
-const std::string config_filename = "config.cfg";
+const std::string config_filename = "cow_player_config.xml";
 
 main_window::main_window(QWidget *parent) :
     QMainWindow(parent),
@@ -54,13 +54,37 @@ main_window::main_window(QWidget *parent) :
 	try {
         config_.load(config_filename);
 	} catch (cowplayer::configuration::exceptions::load_config_error e) {
-        BOOST_LOG_TRIVIAL(warning) << "cow_player: could not open config file!";
+        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: could not open config file!";
 	}
+   
+    try {
+        BOOST_LOG_TRIVIAL(debug) << "cow_player: main_window: constructor: config_.get_download_dir: " << config_.get_download_dir();
+        BOOST_LOG_TRIVIAL(debug) << "cow_player: main_window: constructor: config_.get_bittorrent_port: " << config_.get_bittorrent_port();
+        BOOST_LOG_TRIVIAL(debug) << "cow_player: main_window: constructor: config_.get_program_table_url: " << config_.get_program_table_url();
+    } catch (cowplayer::configuration::exceptions::conversion_error e) {
+        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
+    }
+
 
     // Init client
   	client_.start_logger();
-    client_.set_download_directory(config_.get_download_dir());
-    client_.set_bittorrent_port(config_.get_bittorrent_port());
+   
+    std::string download_dir = ".";
+    try {
+        download_dir = config_.get_download_dir();
+    } catch (cowplayer::configuration::exceptions::conversion_error e) {
+        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
+    }
+    client_.set_download_directory(download_dir); 
+    
+    int bt_port = 23454; 
+    try {
+        bt_port = config_.get_bittorrent_port();
+    } catch (cowplayer::configuration::exceptions::conversion_error e) {
+        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
+    }
+    client_.set_bittorrent_port(bt_port);
+
     register_download_devices();
 
     // It's COWTASTIC!
@@ -184,7 +208,15 @@ void main_window::on_actionFullscreen_triggered()
 void main_window::on_actionShow_program_list_triggered()
 {
     if(!select_program_dialog_.is_populated()) {
-        select_program_dialog_.set_program_table_url(config_.get_program_table_url());
+        std::string program_table_url = "";
+        
+        try{
+            program_table_url = config_.get_program_table_url();
+        } catch (cowplayer::configuration::exceptions::conversion_error e) {
+            BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
+        }
+
+        select_program_dialog_.set_program_table_url(program_table_url);
         select_program_dialog_.populate_list();
     }
     
@@ -193,8 +225,11 @@ void main_window::on_actionShow_program_list_triggered()
     if(select_program_dialog_.exec() == QDialog::Accepted) {
         const libcow::program_info* program = select_program_dialog_.selected_program();
         if(program) {
+            BOOST_LOG_TRIVIAL(debug) << "cow_player: main_window: starting download of " << program->name;  
             start_download(*program);
-        } 
+        } else {
+            BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: got bad program_info pointer from select_program_dialog";
+        }
     }
 }
 

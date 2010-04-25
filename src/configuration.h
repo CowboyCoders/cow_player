@@ -65,6 +65,25 @@ public:
 };
 
 template <>
+class serializer<int>
+{
+public:
+    static property_value serialize(int value)
+    {
+        return std::make_pair("int", boost::lexical_cast<std::string>(value));
+    }
+
+    static int deserialize(const std::string& prop_value)
+    {
+        try {
+            return boost::lexical_cast<int>(prop_value);
+        } catch (boost::bad_lexical_cast) {
+            throw exceptions::conversion_error("Failed to convert data to a integer value.");
+        }
+    }
+};
+
+template <>
 class serializer<bool>
 {
 public:
@@ -77,8 +96,7 @@ public:
     {
         try {
             return boost::lexical_cast<bool>(prop_value);
-        }
-        catch (boost::bad_lexical_cast) {
+        } catch (boost::bad_lexical_cast) {
             throw exceptions::conversion_error("Failed to convert data to a boolean value.");
         }
     }

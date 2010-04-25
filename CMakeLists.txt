@@ -16,6 +16,10 @@ find_package(Qt4 REQUIRED)
 set(QT_USE_PHONON TRUE)
 set(QT_USE_QTSVG TRUE)
 
+if(NOT EXISTS cow_player_config.xml)
+    file(COPY ${COW_PLAYER_SOURCE_DIR}/src/cow_player_config.xml DESTINATION .)
+endif(NOT EXISTS cow_player_config.xml)
+
 if(UNIX)
     ####################### IMPORTANT ###########################
     # You must set the enviroment variable LIBCOW_PATH in your  #
