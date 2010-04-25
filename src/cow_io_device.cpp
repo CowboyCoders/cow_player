@@ -1,4 +1,6 @@
 #include "cow_io_device.h"
+#include <QThread>
+#include <QCoreApplication>
 
 cow_io_device::cow_io_device(Phonon::MediaObject* media_object,
                              libcow::download_control* download_control)
@@ -95,6 +97,11 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
         return 0;
     }
     */
+    
+    if(QCoreApplication::instance() != 0) {
+        bool is_gui_thread = QThread::currentThread()==QCoreApplication::instance()->thread();
+        BOOST_LOG_TRIVIAL(debug) << "cow_io_device::readData: is_gui_thread: " << is_gui_thread;
+    }
 
     shutdown_mutex_.lock();
 
