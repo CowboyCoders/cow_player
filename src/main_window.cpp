@@ -6,6 +6,7 @@
 
 #include <QFile>
 #include <QDir>
+#include <qthread.h>
 
 const std::string config_filename = "cow_player_config.xml";
 
@@ -49,6 +50,7 @@ main_window::main_window(QWidget *parent) :
     // Connect UI gauges
     ui->seekSlider->setMediaObject(media_object_);
     ui->volumeSlider->setAudioOutput(audio_output_);
+
 
     // Load client configuration
 	try {
