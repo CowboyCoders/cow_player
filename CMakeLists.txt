@@ -101,7 +101,6 @@ set(cow_player_SRCS
     ${COW_PLAYER_SOURCE_DIR}/src/video_player.cpp    
     ${COW_PLAYER_SOURCE_DIR}/src/configuration.cpp
     ${COW_PLAYER_SOURCE_DIR}/src/client_configuration.cpp
-    ${COW_PLAYER_SOURCE_DIR}/src/cow_io_device.cpp
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxml.cpp
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxmlerror.cpp
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxmlparser.cpp
@@ -114,6 +113,16 @@ set(cow_player_INCLUDES
     ${COW_PLAYER_SOURCE_DIR}/src/list_item.h
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxml.h
 )
+
+IF(WIN32)
+    LIST(APPEND cow_player_SRCS ${COW_PLAYER_SOURCE_DIR}/src/win32/win32_io_device.cpp)
+    LIST(APPEND cow_player_INCLUDES ${COW_PLAYER_SOURCE_DIR}/src/win32/win32_io_device.h)
+ENDIF(WIN32)
+
+IF(UNIX)
+    LIST(APPEND cow_player_SRCS ${COW_PLAYER_SOURCE_DIR}/src/linux/linux_io_device.cpp)
+    LIST(APPEND cow_player_INCLUDES ${COW_PLAYER_SOURCE_DIR}/src/linux/linux_io_device.h)
+ENDIF(UNIX)
 
 set(cow_player_MOCS
     ${COW_PLAYER_SOURCE_DIR}/src/main_window.h
