@@ -18,7 +18,7 @@ public:
     * Shuts down the IODevice. After a call to shutdown there will be no more calls to 
     * the media object or the download control.
     */
-    void shutdown() { /* not needed on linux */ }
+    void shutdown();
 
     bool is_buffering() const;
 
@@ -33,15 +33,19 @@ public:
     qint64 writeData(const char *data, qint64 len) ;
 
 private:
+    bool check_for_shutdown() const;
+    void set_buffering_status(bool status);
+    
     Phonon::MediaObject* media_object_;
     libcow::download_control* download_control_;
 
     size_t size_;
 
     bool buffering_;
+    bool shutdown_;
 
-    //mutable boost::mutex buffering_mutex_;
-
+    mutable boost::mutex buffering_mutex_;
+    mutable boost::mutex shutdown_mutex_;
 };
 
 
