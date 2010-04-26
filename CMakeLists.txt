@@ -58,7 +58,7 @@ if(UNIX)
 endif(UNIX)
 if(WIN32)
 	include_directories(
-	    ${COW_PLAYER_SOURCE_DIR}/include
+	    ${COW_PLAYER_SOURCE_DIR}/src
         ${COW_PLAYER_SOURCE_DIR}/../libcow/include
 	    ${COW_PLAYER_SOURCE_DIR}/../utils/include
 	    ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml
@@ -74,6 +74,13 @@ endif(WIN32)
 link_directories(
     ${Boost_LIBRARY_DIRS}
 )
+
+IF(WIN32)
+    link_directories(
+        ${COW_PLAYER_SOURCE_DIR}/../libcow/bin
+    )
+endif(WIN32)
+
 
 add_definitions(${QT_DEFINITIONS})
 add_definitions(-DTIXML_USE_STL)
