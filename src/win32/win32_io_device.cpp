@@ -124,9 +124,12 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
             buffering_ = true;
         }
 
-        media_object_->pause();
+        //media_object_->pause();
 
         shutdown_mutex_.unlock();
+
+        if (media_object_->state() == Phonon::PlayingState)
+            return 0;
         
 
         int iter = 1;
@@ -155,7 +158,7 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
         }
 
         shutdown_mutex_.lock();
-        media_object_->play();
+        //media_object_->play();
     }
 
     libcow::utils::buffer buf(data, maxlen);

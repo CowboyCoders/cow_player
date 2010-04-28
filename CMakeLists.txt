@@ -56,6 +56,7 @@ if(UNIX)
 	    ${CMAKE_CURRENT_BINARY_DIR}    
 	)
 endif(UNIX)
+
 if(WIN32)
 	include_directories(
 	    ${COW_PLAYER_SOURCE_DIR}/src
@@ -69,6 +70,10 @@ if(WIN32)
 	    # the UI file won't be wrapped!
 	    ${CMAKE_CURRENT_BINARY_DIR}    
 	)
+    
+    set(EXECUTABLE_OUTPUT_PATH ${COW_PLAYER_SOURCE_DIR}/../bin)
+    set(LIBRARY_OUTPUT_PATH ${COW_PLAYER_SOURCE_DIR}/../bin)
+    
 endif(WIN32)
 
 link_directories(
@@ -77,7 +82,7 @@ link_directories(
 
 IF(WIN32)
     link_directories(
-        ${COW_PLAYER_SOURCE_DIR}/../libcow/bin
+        ${COW_PLAYER_SOURCE_DIR}/../bin
     )
 endif(WIN32)
 

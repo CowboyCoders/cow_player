@@ -171,8 +171,8 @@ void main_window::changeEvent(QEvent *e)
 void main_window::closeEvent(QCloseEvent* e)
 {
     if (iodevice_) {
-        media_object_->stop();
-        iodevice_->shutdown();
+        //iodevice_->shutdown();
+        //media_object_->stop();
     }
     e->accept();
 }
