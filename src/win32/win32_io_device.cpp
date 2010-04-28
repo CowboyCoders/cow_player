@@ -109,6 +109,7 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
         shutdown_mutex_.unlock();
         return 0;
     }
+	shutdown_mutex_.unlock();
 
     // Prioritize pieces in libcow
     download_control_->set_playback_position(pos());
@@ -124,19 +125,13 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
             buffering_ = true;
         }
 
-        //media_object_->pause();
-
-        shutdown_mutex_.unlock();
-
-        if (media_object_->state() == Phonon::PlayingState)
-            return 0;
-        
+        media_object_->pause();
 
         int iter = 1;
         bool done = false;
         while (!done) {
 
-            libcow::system::sleep(250);
+            libcow::system::sleep(25);
 
             shutdown_mutex_.lock();
 
@@ -144,10 +139,9 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
                 shutdown_mutex_.unlock();
                 return 0;
             }
-
-            done = download_control_->has_data(pos(), maxlen);
-
-            shutdown_mutex_.unlock();
+			shutdown_mutex_.unlock();
+            
+			done = download_control_->has_data(pos(), maxlen);
 
             BOOST_LOG_TRIVIAL(debug) << "read() MISSING DATA : pos " << pos() << " : maxlen " << maxlen << " waiting ...." << iter++;
         }
@@ -157,14 +151,11 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
             buffering_ = false;
         }
 
-        shutdown_mutex_.lock();
-        //media_object_->play();
+        media_object_->play();
     }
 
     libcow::utils::buffer buf(data, maxlen);
     size_t len = download_control_->read_data(pos(), buf);
-
-    shutdown_mutex_.unlock();
 
     BOOST_LOG_TRIVIAL(debug) << "read() : pos " << pos() << " : maxlen " << maxlen << " : len " << len;
 
