@@ -228,7 +228,7 @@ void main_window::on_request_complete(std::vector<int> pieces)
 
 void main_window::on_startup_complete()
 {
-    std::cout << "startup complete" << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << "startup complete of " << download_ctrl_->filename();
     std::vector<int> pieces;
     pieces.push_back(0);
     pieces.push_back(1);
