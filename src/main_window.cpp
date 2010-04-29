@@ -25,10 +25,6 @@ main_window::main_window(QWidget *parent) :
     iodevice_(0)
 {
     ui->setupUi(this);
-
-    //buffer_indicator_ = new QSvgWidget("spinner.svg", this);
-    //ui->verticalLayout_2->addWidget(buffer_indicator_);
-    //ui->videoFrame->layout()->addWidget(buffer_indicator_);
     
     // Make sure the fullscreen mode menu is checked correctly
     ui->actionFullscreen->setChecked(fullscreen_mode_);
@@ -38,10 +34,8 @@ main_window::main_window(QWidget *parent) :
 
     // Bind events
     connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(media_stateChanged()));
-    //connect(media_object_, SIGNAL(bufferStatus(int)), this, SLOT(buffer_status(int)));
-    //connect(media_object_, SIGNAL(totalTimeChanged (qint64)), this, SLOT(total_time_changed(qint64)));
-    //connect(media_object_, SIGNAL(tick (qint64)), this, SLOT(tick(qint64)));
     connect(ui->videoPlayer, SIGNAL(leaveFullscreen()), this, SLOT(leaveFullscreen_triggered()));
+    connect(this,SIGNAL(startup_complete()),this,SLOT(start_io_device()));
 
     // Connect the media object with both VideoWidget and the AudioOutput
     Phonon::createPath(media_object_, ui->videoPlayer);
@@ -108,24 +102,23 @@ void main_window::register_download_devices()
 
 bool main_window::start_download(const libcow::program_info& program_info)
 {
-    assert(download_ctrl_ == 0);
-    assert(media_source_ == 0);
-   
+    //media_object_->stop(); // this isn't working right now...
+    
     download_ctrl_ = client_.start_download(program_info);
     if (!download_ctrl_) {
         BOOST_LOG_TRIVIAL(error) << "cow_player: Could not play program.";
         return false;
     }
 
-    std::vector<libcow::piece_request> reqs;
-    reqs.push_back(libcow::piece_request(download_ctrl_->piece_length(), 0, 4));
-    download_ctrl_->pre_buffer(reqs);
-
     piece_dialog_.set_download_control(download_ctrl_);
+    
+    if(download_ctrl_->is_running()) {
+        download_ctrl_->wait_for_pieces(startup_pieces(),boost::bind(&main_window::on_request_complete,this,_1));
+    } else {
+        download_ctrl_->wait_for_startup(boost::bind(&main_window::on_startup_complete,this));
+    }
+    
     statusBar()->showMessage("Loading...");
-
-    download_ctrl_->wait_for_startup(boost::bind(&main_window::on_startup_complete,this));
-
     return true;
 }
 
@@ -207,7 +200,6 @@ void main_window::on_actionShow_program_list_triggered()
     if(select_program_dialog_.exec() == QDialog::Accepted) {
         const libcow::program_info* program = select_program_dialog_.selected_program();
         if(program) {
-            BOOST_LOG_TRIVIAL(debug) << "cow_player: main_window: starting download of " << program->name;  
             start_download(*program);
         } else {
             BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: got bad program_info pointer from select_program_dialog";
@@ -217,8 +209,10 @@ void main_window::on_actionShow_program_list_triggered()
 
 void main_window::start_io_device()
 {
-    iodevice_ = new cow_io_device(media_object_, download_ctrl_);
-    media_source_ = new Phonon::MediaSource(iodevice_);
+    iodevice_ = new cow_io_device(media_object_, download_ctrl_); // leaking memory right here
+    if(media_source_ == 0) {
+        media_source_ = new Phonon::MediaSource(iodevice_);
+    }
     media_object_->setCurrentSource(*media_source_);
     media_object_->play();
 
@@ -226,14 +220,11 @@ void main_window::start_io_device()
 
 void main_window::on_request_complete(std::vector<int> pieces)
 {
-    std::vector<int>::iterator it;
-    connect(this,SIGNAL(startup_complete()),this,SLOT(start_io_device()));
     emit startup_complete(); 
 }
 
-void main_window::on_startup_complete()
+std::vector<int> main_window::startup_pieces()
 {
-    BOOST_LOG_TRIVIAL(debug) << "startup complete of " << download_ctrl_->filename();
     std::vector<int> pieces;
     pieces.push_back(0);
     pieces.push_back(1);
@@ -241,7 +232,12 @@ void main_window::on_startup_complete()
     pieces.push_back(3);
     pieces.push_back(4);
     pieces.push_back(download_ctrl_->num_pieces()-1);
-    download_ctrl_->wait_for_pieces(pieces,boost::bind(&main_window::on_request_complete,this,_1));
+    return pieces;
+}
+
+void main_window::on_startup_complete()
+{
+    download_ctrl_->wait_for_pieces(startup_pieces(),boost::bind(&main_window::on_request_complete,this,_1));
 }
 
 void main_window::on_actionShow_pieces_triggered()

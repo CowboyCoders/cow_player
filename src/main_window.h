@@ -37,6 +37,7 @@ private:
     bool start_download(const libcow::program_info& program_info);
     void stop_download();
     void register_download_devices();
+    std::vector<int> startup_pieces();
 
     
     Ui::main_window *ui;
