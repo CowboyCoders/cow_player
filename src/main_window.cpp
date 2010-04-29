@@ -116,6 +116,11 @@ bool main_window::start_download(const libcow::program_info& program_info)
         BOOST_LOG_TRIVIAL(error) << "cow_player: Could not play program.";
         return false;
     }
+
+    std::vector<libcow::piece_request> reqs;
+    reqs.push_back(libcow::piece_request(download_ctrl_->piece_length(), 0, 4));
+    download_ctrl_->pre_buffer(reqs);
+
     piece_dialog_.set_download_control(download_ctrl_);
     iodevice_ = new cow_io_device(media_object_, download_ctrl_);
 

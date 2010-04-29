@@ -21,7 +21,7 @@ void cow_io_device::shutdown()
 
 bool cow_io_device::is_buffering() const 
 {
-    boost::mutex::scoped_lock lock(shutdown_mutex_);
+    boost::mutex::scoped_lock lock(buffering_mutex_);
     return buffering_;
 }
 
@@ -70,16 +70,9 @@ qint64 cow_io_device::bytesAvailable() const
 
 bool cow_io_device::check_for_shutdown() const
 {
-    shutdown_mutex_.lock();
+    boost::mutex::scoped_lock lock(shutdown_mutex_);
 
-    if (shutdown_) {
-        shutdown_mutex_.unlock();
-        return true;
-    } else {
-        shutdown_mutex_.unlock();
-        return false;
-    }
-
+    return shutdown_;
 }
 
 void cow_io_device::set_buffering_status(bool status)
@@ -87,6 +80,7 @@ void cow_io_device::set_buffering_status(bool status)
     boost::mutex::scoped_lock lock(buffering_mutex_);
     buffering_ = status;
 }
+
 qint64 cow_io_device::readData(char *data, qint64 maxlen)
 {
     if(QCoreApplication::instance() != 0) {
@@ -110,17 +104,27 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
         
         set_buffering_status(true);
 
-        int iter = 1;
-        bool done = false;
-        shutdown_mutex_.unlock();
-        while (!done) {
+        int recheck_count = 1;
+        int retry_delay = 10; 
+        while (true) {
             if(check_for_shutdown()) {
                 BOOST_LOG_TRIVIAL(debug) << "cow_io_device:readData: shutting down";
                 return -1;
             }
             libcow::system::sleep(250);
-            done = download_control_->has_data(pos(), maxlen);
-            BOOST_LOG_TRIVIAL(debug) << "read() MISSING DATA : pos " << pos() << " : maxlen " << maxlen << " waiting ...." << iter++;
+
+            if(( download_control_->has_data(pos(), maxlen) )) {
+                break;
+            }
+            BOOST_LOG_TRIVIAL(debug) << "read() MISSING DATA : pos " << pos() 
+                                     << " : maxlen " << maxlen << " waiting ...." << recheck_count;
+
+            if(recheck_count % retry_delay == 0) {
+                // forced request for critical window
+                download_control_->set_playback_position(pos(), true);
+            }
+            
+            ++recheck_count;
         }
 
         set_buffering_status(false);

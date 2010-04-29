@@ -33,6 +33,7 @@ if(UNIX)
     # Then log out and log in, and the variable will be set!    #
     # You can now build cow_player!                             #
     ####################### IMPORTANT ###########################
+    message(STATUS "LIBCOW_PATH=$ENV{LIBCOW_PATH}")
 
     set(LIBCOW_INCLUDE_DIR $ENV{LIBCOW_PATH}/include)
     set(LIBCOW_LIBRARY $ENV{LIBCOW_PATH}/bin/libcowd.so)
