@@ -117,14 +117,9 @@ bool main_window::start_download(const libcow::program_info& program_info)
         return false;
     }
     piece_dialog_.set_download_control(download_ctrl_);
-    iodevice_ = new cow_io_device(media_object_, download_ctrl_);
-
-    media_source_ = new Phonon::MediaSource(iodevice_);
-    media_object_->setCurrentSource(*media_source_);
-   
     statusBar()->showMessage("Loading...");
 
-    media_object_->play();
+    download_ctrl_->wait_for_startup(boost::bind(&main_window::on_startup_complete,this));
 
     return true;
 }
@@ -215,6 +210,35 @@ void main_window::on_actionShow_program_list_triggered()
     }
 }
 
+void main_window::start_io_device()
+{
+    iodevice_ = new cow_io_device(media_object_, download_ctrl_);
+    media_source_ = new Phonon::MediaSource(iodevice_);
+    media_object_->setCurrentSource(*media_source_);
+    media_object_->play();
+
+}
+
+void main_window::on_request_complete(std::vector<int> pieces)
+{
+    std::vector<int>::iterator it;
+    connect(this,SIGNAL(startup_complete()),this,SLOT(start_io_device()));
+    emit startup_complete(); 
+}
+
+void main_window::on_startup_complete()
+{
+    std::cout << "startup complete" << std::endl;
+    std::vector<int> pieces;
+    pieces.push_back(0);
+    pieces.push_back(1);
+    pieces.push_back(2);
+    pieces.push_back(3);
+    pieces.push_back(4);
+    pieces.push_back(download_ctrl_->num_pieces()-1);
+    download_ctrl_->wait_for_pieces(pieces,boost::bind(&main_window::on_request_complete,this,_1));
+}
+
 void main_window::on_actionShow_pieces_triggered()
 {
     piece_dialog_.show();
@@ -237,6 +261,7 @@ void main_window::media_stateChanged()
     if (media_object_->state()==Phonon::LoadingState) {
         statusBar()->showMessage("Loading...");
     } else if (media_object_->state()==Phonon::PlayingState) {
+        statusBar()->showMessage("Playing");
         ui->playButton->setText("Pause");
     } else if(media_object_->state() == Phonon::StoppedState) {
         ui->playButton->setText("Play");
