@@ -31,10 +31,13 @@ protected:
     void closeEvent(QCloseEvent* e);
 
 private:
+    void on_startup_complete();
+    void on_request_complete(std::vector<int> pieces);
     void set_fullscreen(bool fullscreen);
     bool start_download(const libcow::program_info& program_info);
     void stop_download();
     void register_download_devices();
+
     
     Ui::main_window *ui;
 
@@ -58,6 +61,7 @@ private:
     bool fullscreen_mode_;
     
 private slots:
+    void start_io_device();
     void media_stateChanged();
     void on_stopButton_clicked();
     void on_playButton_clicked();
@@ -71,6 +75,9 @@ private slots:
     void tick(qint64 time);
     void buffer_status(int percent_filled);
     void total_time_changed(qint64 total_time);
+
+signals:
+    void startup_complete();
     
 };
 
