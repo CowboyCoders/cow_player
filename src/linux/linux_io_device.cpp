@@ -5,7 +5,6 @@
 cow_io_device::cow_io_device(Phonon::MediaObject* media_object,
                              libcow::download_control* download_control)
     : download_control_(download_control)
-    , media_object_(media_object)
     , buffering_(false)
     , shutdown_(false)
 {

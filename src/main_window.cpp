@@ -75,7 +75,7 @@ main_window::main_window(QWidget *parent) :
     }
     client_.set_download_directory(download_dir); 
     
-    int bt_port = 23454; 
+    int bt_port; 
     try {
         bt_port = config_.get_bittorrent_port();
     } catch (cowplayer::configuration::exceptions::conversion_error e) {
@@ -141,7 +141,10 @@ void main_window::stop_download()
 
 main_window::~main_window()
 {
+    delete audio_output_;
+    delete iodevice_;
     delete media_source_;
+    delete media_object_;
     delete ui;
 }
 
@@ -173,10 +176,6 @@ void main_window::changeEvent(QEvent *e)
 
 void main_window::closeEvent(QCloseEvent* e)
 {
-    if (iodevice_) {
-        //iodevice_->shutdown();
-        //media_object_->stop();
-    }
     e->accept();
 }
 
@@ -220,12 +219,16 @@ void main_window::on_actionShow_program_list_triggered()
 
 void main_window::start_io_device()
 {
-    iodevice_ = new cow_io_device(media_object_, download_ctrl_); // leaking memory right here
+    if(iodevice_ != 0) {
+        delete iodevice_;
+    }
     if(media_source_ != 0) {
         delete media_source_;
     }
     
+    iodevice_ = new cow_io_device(media_object_, download_ctrl_);
     media_source_ = new Phonon::MediaSource(iodevice_);
+    
     media_object_->setCurrentSource(*media_source_);
     media_object_->play();
 }

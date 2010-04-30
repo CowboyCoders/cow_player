@@ -36,7 +36,6 @@ private:
     bool check_for_shutdown() const;
     void set_buffering_status(bool status);
     
-    Phonon::MediaObject* media_object_;
     libcow::download_control* download_control_;
 
     size_t size_;
