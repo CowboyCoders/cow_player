@@ -7,16 +7,16 @@ cow_io_device::cow_io_device(Phonon::MediaObject* media_object,
     : download_control_(download_control)
     , media_object_(media_object)
     , buffering_(false)
-    , shutdown_(false)
+    , blocking_(true)
 {
     open(QIODevice::ReadOnly);
     size_ = download_control_->file_size();
 }
 
-void cow_io_device::shutdown()
+void cow_io_device::set_blocking(bool blocking)
 {
-    boost::mutex::scoped_lock lock(shutdown_mutex_);
-    shutdown_ = true;
+    boost::mutex::scoped_lock lock(blocking_mutex_);
+    blocking_ = blocking;
 }
 
 bool cow_io_device::is_buffering() const 
@@ -54,62 +54,19 @@ qint64 cow_io_device::size() const
 bool cow_io_device::seek(qint64 pos)
 {
     BOOST_LOG_TRIVIAL(debug) << "seek() : offset " << pos;
-    if(pos > size_) {
+    if(pos >= size_) {
         return false;
     } 
     
     return QIODevice::seek(pos);
 }
 
-/*
-qint64 cow_io_device::bytesAvailable() const
-{
-    boost::mutex::scoped_lock lock(shutdown_mutex_);
-
-    if (shutdown_) {
-        return 0;
-    }
-
-    qint64 len = download_control_->bytes_available(pos());
-    BOOST_LOG_TRIVIAL(debug) << "bytesAvailable() : result " << len;
-
-    return len;
-}
-*/
-
-qint64 cow_io_device::bytesAvailable() const
-{
-    qint64 len = QIODevice::bytesAvailable(); 
-    BOOST_LOG_TRIVIAL(debug) << "bytesAvailable() : result " << len;
-    return len; 
-}
 qint64 cow_io_device::readData(char *data, qint64 maxlen)
 {
-    /*
-    // DirextShow9 backend do seek to size-1024^2 when it opens up a video.
-    // If this method returns 0, the backend can not determine the length of
-    // the movie, but the playback will still work properly. The seekbar
-    // will however not function.
-    if (pos() == size() - 1024*1024) {
-#if _DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "read() ABORT BECAUSE READING LAST PIECE";
-#endif        
-        return 0;
+    if (!isOpen()) {
+        BOOST_LOG_TRIVIAL(debug) << "cow_io_device::readData: device is closed.";
+        return -1;
     }
-    */
-    
-    if(QCoreApplication::instance() != 0) {
-        bool is_gui_thread = QThread::currentThread()==QCoreApplication::instance()->thread();
-        BOOST_LOG_TRIVIAL(debug) << "cow_io_device::readData: is_gui_thread: " << is_gui_thread;
-    }
-
-    shutdown_mutex_.lock();
-
-    if (shutdown_) {
-        shutdown_mutex_.unlock();
-        return 0;
-    }
-	shutdown_mutex_.unlock();
 
     // Prioritize pieces in libcow
     download_control_->set_playback_position(pos());
@@ -118,30 +75,30 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
     BOOST_LOG_TRIVIAL(debug) << "cow_io_device::readData: "
                              << "pos: " << pos() << " maxlen: "
                              << maxlen << " has_data: " << has_data;
+
     if (!has_data) {
 
         {   // Update buffering flag
             boost::mutex::scoped_lock lock(buffering_mutex_);
             buffering_ = true;
+            media_object_->pause();
         }
-
-        media_object_->pause();
 
         int iter = 1;
         bool done = false;
         while (!done) {
 
-            libcow::system::sleep(25);
-
-            shutdown_mutex_.lock();
-
-            if (shutdown_) {
-                shutdown_mutex_.unlock();
-                return 0;
+            {   
+                boost::mutex::scoped_lock lock(blocking_mutex_);
+                if (!blocking_) {
+                    boost::mutex::scoped_lock lock(buffering_mutex_);
+                    buffering_ = false;
+                    return 0;
+                }
             }
-			shutdown_mutex_.unlock();
-            
-			done = download_control_->has_data(pos(), maxlen);
+
+            libcow::system::sleep(50);
+            done = download_control_->has_data(pos(), maxlen);
 
             BOOST_LOG_TRIVIAL(debug) << "read() MISSING DATA : pos " << pos() << " : maxlen " << maxlen << " waiting ...." << iter++;
         }
@@ -149,9 +106,10 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
         {   // Update buffering flag
             boost::mutex::scoped_lock lock(buffering_mutex_);
             buffering_ = false;
+            media_object_->play();
         }
 
-        media_object_->play();
+        //media_object_->play();
     }
 
     libcow::utils::buffer buf(data, maxlen);

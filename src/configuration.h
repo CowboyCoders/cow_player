@@ -265,7 +265,11 @@ public:
         if (item == property_map_.end())
             return default_value;
 
-        return serializer<T>::deserialize(item->second.second);
+        try {
+            return serializer<T>::deserialize(item->second.second);
+        } catch (exceptions::conversion_error) {
+            return default_value;
+        }
     }
 
 private:
