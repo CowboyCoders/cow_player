@@ -25,6 +25,8 @@ main_window::main_window(QWidget *parent) :
     iodevice_(0)
 {
     ui->setupUi(this);
+
+
     
     // Make sure the fullscreen mode menu is checked correctly
     ui->actionFullscreen->setChecked(fullscreen_mode_);
@@ -121,10 +123,8 @@ bool main_window::start_download(const libcow::program_info& program_info)
     piece_dialog_.set_download_control(download_ctrl_);
     
     if(download_ctrl_->is_running()) {
-        std::cout << "libtorrent is running" << std::endl;
         download_ctrl_->wait_for_pieces(startup_pieces(),boost::bind(&main_window::on_request_complete,this,_1));
     } else {
-        std::cout << "libtorrent is not running" << std::endl;
         download_ctrl_->wait_for_startup(boost::bind(&main_window::on_startup_complete,this));
     }
     
@@ -228,7 +228,6 @@ void main_window::start_io_device()
     media_source_ = new Phonon::MediaSource(iodevice_);
     media_object_->setCurrentSource(*media_source_);
     media_object_->play();
-
 }
 
 void main_window::on_request_complete(std::vector<int> pieces)
@@ -309,7 +308,6 @@ void main_window::on_playButton_clicked()
 
 void main_window::on_stopButton_clicked()
 {
-    //media_object_->stop();
     stop_playback();
 }
 
