@@ -121,8 +121,10 @@ bool main_window::start_download(const libcow::program_info& program_info)
     piece_dialog_.set_download_control(download_ctrl_);
     
     if(download_ctrl_->is_running()) {
+        std::cout << "libtorrent is running" << std::endl;
         download_ctrl_->wait_for_pieces(startup_pieces(),boost::bind(&main_window::on_request_complete,this,_1));
     } else {
+        std::cout << "libtorrent is not running" << std::endl;
         download_ctrl_->wait_for_startup(boost::bind(&main_window::on_startup_complete,this));
     }
     
