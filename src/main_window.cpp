@@ -25,6 +25,8 @@ main_window::main_window(QWidget *parent) :
     iodevice_(0)
 {
     ui->setupUi(this);
+
+
     
     // Make sure the fullscreen mode menu is checked correctly
     ui->actionFullscreen->setChecked(fullscreen_mode_);
@@ -226,7 +228,6 @@ void main_window::start_io_device()
     media_source_ = new Phonon::MediaSource(iodevice_);
     media_object_->setCurrentSource(*media_source_);
     media_object_->play();
-
 }
 
 void main_window::on_request_complete(std::vector<int> pieces)
