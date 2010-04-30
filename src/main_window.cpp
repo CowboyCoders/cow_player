@@ -100,10 +100,18 @@ void main_window::register_download_devices()
         "multicast");
 }
 
+void main_window::stop_playback()
+{
+    if(media_object_) {
+        media_object_->pause();
+        media_object_->seek(0);
+    }
+}
+
 bool main_window::start_download(const libcow::program_info& program_info)
 {
-    //media_object_->stop(); // this isn't working right now...
-    
+    stop_playback(); 
+
     download_ctrl_ = client_.start_download(program_info);
     if (!download_ctrl_) {
         BOOST_LOG_TRIVIAL(error) << "cow_player: Could not play program.";
@@ -210,9 +218,11 @@ void main_window::on_actionShow_program_list_triggered()
 void main_window::start_io_device()
 {
     iodevice_ = new cow_io_device(media_object_, download_ctrl_); // leaking memory right here
-    if(media_source_ == 0) {
-        media_source_ = new Phonon::MediaSource(iodevice_);
+    if(media_source_ != 0) {
+        delete media_source_;
     }
+    
+    media_source_ = new Phonon::MediaSource(iodevice_);
     media_object_->setCurrentSource(*media_source_);
     media_object_->play();
 
@@ -296,7 +306,8 @@ void main_window::on_playButton_clicked()
 
 void main_window::on_stopButton_clicked()
 {
-    media_object_->stop();
+    //media_object_->stop();
+    stop_playback();
 }
 
 void main_window::buffer_status(int percent_filled)

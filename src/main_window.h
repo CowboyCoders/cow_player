@@ -31,6 +31,7 @@ protected:
     void closeEvent(QCloseEvent* e);
 
 private:
+    void stop_playback();
     void on_startup_complete();
     void on_request_complete(std::vector<int> pieces);
     void set_fullscreen(bool fullscreen);
