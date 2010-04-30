@@ -64,7 +64,8 @@ private:
     
 private slots:
     void start_io_device();
-    void media_stateChanged();
+
+    void media_stateChanged(Phonon::State oldState, Phonon::State newState);
     void on_stopButton_clicked();
     void on_playButton_clicked();
     void on_actionShow_program_list_triggered();

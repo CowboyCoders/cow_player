@@ -31,38 +31,17 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QFrame" name="videoFrame">
+     <widget class="video_player" name="videoPlayer" native="true">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="margin">
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="video_player" name="videoPlayer" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-           <horstretch>100</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </item>
     <item>
-     <widget class="Phonon::SeekSlider" name="seekSlider" native="true"/>
+     <widget class="Phonon::SeekSlider" name="seekSlider"/>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
@@ -94,7 +73,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="Phonon::VolumeSlider" name="volumeSlider" native="true">
+       <widget class="Phonon::VolumeSlider" name="volumeSlider">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -119,7 +98,7 @@
      <x>0</x>
      <y>0</y>
      <width>790</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">

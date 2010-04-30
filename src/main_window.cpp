@@ -33,7 +33,8 @@ main_window::main_window(QWidget *parent) :
     audio_output_ = new Phonon::AudioOutput(Phonon::VideoCategory, this);
 
     // Bind events
-    connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(media_stateChanged()));
+    connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), 
+        this, SLOT(media_stateChanged(Phonon::State, Phonon::State)));
     connect(ui->videoPlayer, SIGNAL(leaveFullscreen()), this, SLOT(leaveFullscreen_triggered()));
     connect(this,SIGNAL(startup_complete()),this,SLOT(start_io_device()));
 
@@ -50,36 +51,19 @@ main_window::main_window(QWidget *parent) :
 	try {
         config_.load(config_filename);
 	} catch (cowplayer::configuration::exceptions::load_config_error e) {
-        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: could not open config file!";
+        BOOST_LOG_TRIVIAL(warning) << "cow_player: could not load config file \"" << config_filename << "\": " << e.what();
 	}
    
-    try {
-        BOOST_LOG_TRIVIAL(debug) << "cow_player: main_window: constructor: config_.get_download_dir: " << config_.get_download_dir();
-        BOOST_LOG_TRIVIAL(debug) << "cow_player: main_window: constructor: config_.get_bittorrent_port: " << config_.get_bittorrent_port();
-        BOOST_LOG_TRIVIAL(debug) << "cow_player: main_window: constructor: config_.get_program_table_url: " << config_.get_program_table_url();
-    } catch (cowplayer::configuration::exceptions::conversion_error e) {
-        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
-    }
-
+    BOOST_LOG_TRIVIAL(debug) << "cow_player: configuration:";
+    BOOST_LOG_TRIVIAL(debug) << "cow_player:   download_dir:           " << config_.get_download_dir();
+    BOOST_LOG_TRIVIAL(debug) << "cow_player:   bittorrent_port:        " << config_.get_bittorrent_port();
+    BOOST_LOG_TRIVIAL(debug) << "cow_player:   program_table_url:      " << config_.get_program_table_url();
 
     // Init client
   	client_.start_logger();
    
-    std::string download_dir = ".";
-    try {
-        download_dir = config_.get_download_dir();
-    } catch (cowplayer::configuration::exceptions::conversion_error e) {
-        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
-    }
-    client_.set_download_directory(download_dir); 
-    
-    int bt_port = 23454; 
-    try {
-        bt_port = config_.get_bittorrent_port();
-    } catch (cowplayer::configuration::exceptions::conversion_error e) {
-        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
-    }
-    client_.set_bittorrent_port(bt_port);
+    client_.set_download_directory(config_.get_download_dir()); 
+    client_.set_bittorrent_port(config_.get_bittorrent_port());
 
     register_download_devices();
 
@@ -102,15 +86,27 @@ void main_window::register_download_devices()
 
 void main_window::stop_playback()
 {
-    if(media_object_) {
+    BOOST_LOG_TRIVIAL(debug) << "cow_player: pre stop";  
+
+    if(media_object_ && iodevice_) {
+#ifdef WIN32
+        iodevice_->set_blocking(false);
+        media_object_->stop();
+        iodevice_->set_blocking(true);
+#else
         media_object_->pause();
         media_object_->seek(0);
+#endif        
     }
+
+    BOOST_LOG_TRIVIAL(debug) << "cow_player: post stop";  
 }
 
 bool main_window::start_download(const libcow::program_info& program_info)
 {
     stop_playback(); 
+
+    statusBar()->showMessage("Starting program...");
 
     download_ctrl_ = client_.start_download(program_info);
     if (!download_ctrl_) {
@@ -172,9 +168,20 @@ void main_window::changeEvent(QEvent *e)
 void main_window::closeEvent(QCloseEvent* e)
 {
     if (iodevice_) {
-        //iodevice_->shutdown();
-        //media_object_->stop();
+#ifdef WIN32
+        iodevice_->set_blocking(false);
+        media_object_->stop();
+        iodevice_->close();
+#endif
     }
+
+    // Save configuration
+	try {
+        config_.save(config_filename);
+    } catch (cowplayer::configuration::exceptions::save_config_error e) {
+        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: could not save config file!";
+	}
+
     e->accept();
 }
 
@@ -191,12 +198,16 @@ void main_window::on_actionFullscreen_triggered()
 void main_window::on_actionShow_program_list_triggered()
 {
     if(!select_program_dialog_.is_populated()) {
-        std::string program_table_url = "";
+        std::string program_table_url;
         
         try{
             program_table_url = config_.get_program_table_url();
         } catch (cowplayer::configuration::exceptions::conversion_error e) {
             BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
+
+            //TODO: Add error message dialog
+
+            return;
         }
 
         select_program_dialog_.set_program_table_url(program_table_url);
@@ -217,10 +228,17 @@ void main_window::on_actionShow_program_list_triggered()
 
 void main_window::start_io_device()
 {
-    iodevice_ = new cow_io_device(media_object_, download_ctrl_); // leaking memory right here
     if(media_source_ != 0) {
         delete media_source_;
+        media_source_ = 0;
     }
+
+    if(iodevice_ != 0) {
+        delete iodevice_;
+        iodevice_ = 0;
+    }
+
+    iodevice_ = new cow_io_device(media_object_, download_ctrl_); // leaking memory right here
     
     media_source_ = new Phonon::MediaSource(iodevice_);
     media_object_->setCurrentSource(*media_source_);
@@ -236,12 +254,11 @@ void main_window::on_request_complete(std::vector<int> pieces)
 std::vector<int> main_window::startup_pieces()
 {
     std::vector<int> pieces;
-    pieces.push_back(0);
-    pieces.push_back(1);
-    pieces.push_back(2);
-    pieces.push_back(3);
-    pieces.push_back(4);
+    for (int i = 0; i < 5; ++i)
+        pieces.push_back(i);
+
     pieces.push_back(download_ctrl_->num_pieces()-1);
+
     return pieces;
 }
 
@@ -265,26 +282,36 @@ void main_window::leaveFullscreen_triggered()
     set_fullscreen(false);
 }
 
-void main_window::media_stateChanged()
+void main_window::media_stateChanged(Phonon::State oldState, Phonon::State newState)
 {
     bool buffering = iodevice_ && iodevice_->is_buffering();
 
-    if (media_object_->state()==Phonon::LoadingState) {
+    switch (media_object_->state()) {
+    case Phonon::LoadingState:
         statusBar()->showMessage("Loading...");
-    } else if (media_object_->state()==Phonon::PlayingState) {
+        break;
+    case Phonon::PlayingState:
         statusBar()->showMessage("Playing");
         ui->playButton->setText("Pause");
-    } else if(media_object_->state() == Phonon::StoppedState) {
+        break;
+    case Phonon::StoppedState:
         ui->playButton->setText("Play");
-    } else if(media_object_->state()==Phonon::ErrorState) {
-		this->statusBar()->showMessage(media_object_->errorString());
-    } else if (media_object_->state()==Phonon::PausedState) {
+        statusBar()->showMessage("Stopped");
+        break;
+    case Phonon::PausedState:
         if (buffering) {
             ui->playButton->setText("Pause");
             statusBar()->showMessage("Buffering...");
         } else {
             ui->playButton->setText("Play");
+            statusBar()->showMessage("Paused");
         }
+        break;
+    case Phonon::ErrorState:
+        ui->playButton->setText("Play");
+		statusBar()->showMessage(media_object_->errorString());
+        BOOST_LOG_TRIVIAL(error) << "Media object error: " << media_object_->errorString().toUtf8().data();
+        break;
     }
 }
 
@@ -292,21 +319,29 @@ void main_window::on_playButton_clicked()
 {
     bool buffering = iodevice_ && iodevice_->is_buffering();
 
-    Phonon::State s = media_object_->state();
-    if (media_object_->state() == Phonon::PlayingState){
+    switch (media_object_->state()) {
+    case Phonon::PlayingState:
+        iodevice_->set_blocking(false);
         media_object_->pause();
-    } else if (media_object_->state() == Phonon::StoppedState) {
+        iodevice_->set_blocking(true);
+        break;
+    case Phonon::StoppedState:
         media_object_->play();
-    } else if (media_object_->state() == Phonon::PausedState && !buffering) {
+        break;
+    case Phonon::PausedState:
+        if (!buffering) {
+            media_object_->play();
+        }
+        break;
+    case Phonon::ErrorState:
+        // Try to play anyway...!
         media_object_->play();
-    } else if (media_object_->state()==Phonon::ErrorState) {
-        statusBar()->showMessage(media_object_->errorString());
+        break;
     }
 }
 
 void main_window::on_stopButton_clicked()
 {
-    //media_object_->stop();
     stop_playback();
 }
 
@@ -319,11 +354,26 @@ void main_window::buffer_status(int percent_filled)
 #endif
 }
 
+std::string time2str(qint64 time)
+{
+    int hours = time / (1000*60*60);
+    time -= hours * 1000*60*60;
+    int minutes = time  / (1000*60);
+    time -= minutes * 1000*60;
+    int seconds = time  / 1000;
+
+    std::stringstream ss;
+    ss << std::setw(2) << hours << ":" << minutes << ":" << seconds;
+    return ss.str();
+}
+
 void main_window::tick(qint64 time)
 {
-    std::stringstream ss;
-    ss << "Time: " << (time/1000.0) << "/" << (media_object_->totalTime()/1000.0);
-    statusBar()->showMessage(QString(ss.str().c_str()));
+    if (media_object_->state() == Phonon::PlayingState) {
+        std::stringstream ss;
+        ss << "Time: " << time2str(time) << "/" << time2str(media_object_->totalTime());
+        statusBar()->showMessage(QString(ss.str().c_str()));
+    }
 }
 
 void main_window::total_time_changed(qint64 total_time)

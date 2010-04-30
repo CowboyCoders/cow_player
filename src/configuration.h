@@ -12,6 +12,7 @@ namespace cowplayer {
 namespace configuration {
 
 namespace exceptions {
+
 class load_config_error : public std::runtime_error
 {
 public:
@@ -131,7 +132,11 @@ public:
         if (item == property_map_.end())
             return default_value;
 
-        return serializer<T>::deserialize(item->second.second);
+        try {
+            return serializer<T>::deserialize(item->second.second);
+        } catch (exceptions::conversion_error) {
+            return default_value;
+        }
     }
 
 private:
