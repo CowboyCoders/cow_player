@@ -200,7 +200,8 @@ void main_window::on_actionShow_program_list_triggered()
         }
 
         select_program_dialog_.set_program_table_url(program_table_url);
-        select_program_dialog_.populate_list();
+        size_t timeout = 15; // in seconds
+        select_program_dialog_.populate_list(timeout);
     }
     
     select_program_dialog_.show();

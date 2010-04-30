@@ -4,6 +4,7 @@
 #include <QDialog>
 
 #include <cow/cow.hpp>
+#include <cow/dispatcher.hpp>
 
 
 namespace Ui {
@@ -30,7 +31,7 @@ public:
      * Fills the list widget with program names which are
      * being fetched from the a program_table_server.
      */
-    void populate_list();
+    void populate_list(size_t timeout);
     
     const libcow::program_info* selected_program()
     {
@@ -58,6 +59,9 @@ protected:
     void changeEvent(QEvent *e);
 
 private:
+    void download_list(std::string url, size_t timeout);
+    void show_list();
+    void show_msg(QString msg);
     Ui::select_program_dialog *ui;
 
     libcow::program_table prog_table_;
@@ -69,8 +73,14 @@ private:
     bool is_populated_;
     bool connected_;
 
+    libcow::dispatcher disp_;
+
 private slots:
     void on_buttonBox_accepted();
+    void handle_download_completed(bool result);
+
+signals:
+    void download_completed(bool result);
 };
 
 #endif // SELECT_PROGRAM_DIALOG_H
