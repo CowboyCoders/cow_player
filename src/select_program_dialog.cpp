@@ -10,9 +10,11 @@ select_program_dialog::select_program_dialog(QWidget *parent) :
     ui(new Ui::select_program_dialog),
     selected_program_index_(-1),
     is_populated_(false),
-    connected_(false)
+    connected_(false),
+    disp_(0)
 {
     ui->setupUi(this);
+    connect(this,SIGNAL(download_completed(bool)),this,SLOT(handle_download_completed(bool)));
 }
 
 select_program_dialog::~select_program_dialog()
@@ -32,24 +34,44 @@ void select_program_dialog::changeEvent(QEvent *e)
     }
 }
 
-void select_program_dialog::populate_list() 
+void select_program_dialog::show_msg(QString msg)
 {
     ui->program_list_->clear();
+    ui->program_list_->addItem(msg);
+}
 
-    if (!prog_table_.load_from_http(program_table_url_)) {
-        QString error = "Could not connect to program server";
-        ui->program_list_->addItem(error);
-        connected_ = false;
-    } else {
-        libcow::program_table::iterator it = prog_table_.begin();
-        for (; it != prog_table_.end(); ++it) {
-            QString movie_name(it->name.c_str());
-            ui->program_list_->addItem(movie_name);
-        }
-        connected_ = true;
+void select_program_dialog::show_list()
+{
+    ui->program_list_->clear();
+    libcow::program_table::iterator it = prog_table_.begin();
+    for (; it != prog_table_.end(); ++it) {
+        QString movie_name(it->name.c_str());
+        ui->program_list_->addItem(movie_name);
     }
-    
     is_populated_ = true;
+}
+
+void select_program_dialog::handle_download_completed(bool res)
+{
+    if(res) {
+        connected_ = true;
+        show_list();
+    } else {
+        connected_ = false;
+        show_msg("Could not connect to server");
+    }
+}
+
+void select_program_dialog::download_list(std::string url, size_t timeout)
+{
+    bool res = prog_table_.load_from_http(url,timeout);
+    emit download_completed(res);
+}
+
+void select_program_dialog::populate_list(size_t timeout) 
+{
+    show_msg("Connecting to server");
+    disp_.post<boost::function<void()> >(boost::bind(&select_program_dialog::download_list,this,program_table_url_,timeout));
 }
 
 void select_program_dialog::on_buttonBox_accepted()
