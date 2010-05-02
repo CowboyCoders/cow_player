@@ -33,7 +33,7 @@ or implied, of CowboyCoders.
 
 #include <string>
 
-namespace cowplayer {
+namespace cow_player {
 /**
  *  This class is responsible for storing client settings.
  */
@@ -61,11 +61,21 @@ public:
    /**
     * A configuration property for setting the port to use for BitTorrent downloads.
     */
-    CONFIGURATION_PROPERTY(bittorrent_port, int, 23454);
+    CONFIGURATION_PROPERTY(bittorrent_port, int, 55678);
    /**
     * A configuration property for setting the directory to download files to.
     */
     CONFIGURATION_PROPERTY(download_dir, std::string, ".");
+   
+   /**
+    * A configuration property for setting the number of pieces in the critical window.
+    */
+    CONFIGURATION_PROPERTY(critical_window, int, 5);
+   
+   /**
+    * A configuration property for setting the timeout of a piece in the critical window
+    */
+    CONFIGURATION_PROPERTY(critical_window_timeout, int, 3000);
 };
 
 }

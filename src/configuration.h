@@ -36,7 +36,9 @@ or implied, of CowboyCoders.
 #include <sstream>
 #include <stdexcept>
 
-namespace cowplayer {
+#include "cow_player_types.h"
+
+namespace cow_player {
 namespace configuration {
 
 namespace exceptions {
@@ -81,10 +83,6 @@ public:
 
 }
 
-// fst: type
-// snd: value
-typedef std::pair<std::string, std::string> property_value;
-
 /**
  * This class is responsible for generating and retrieving a storable representation
  * for a value of type T. 
@@ -98,7 +96,7 @@ public:
     * @param value The value to try to serialize.
     * @return A pair variable that stores the original value.
     */
-    static property_value serialize(T value) {
+    static cow_player::property_value serialize(T value) {
         throw exceptions::conversion_error("Missing serializer for the specified type."); 
     }
 
@@ -125,7 +123,7 @@ public:
     * @param value The value to serialize.
     * @return A pair variable that stores the original value.
     */
-    static property_value serialize(const std::string& value)
+    static cow_player::property_value serialize(const std::string& value)
     {
         return std::make_pair("string", value);
     }
@@ -154,7 +152,7 @@ public:
     * @param value The value to serialize.
     * @return A pair variable that stores the original value.
     */
-    static property_value serialize(int value)
+    static cow_player::property_value serialize(int value)
     {
         return std::make_pair("int", boost::lexical_cast<std::string>(value));
     }
@@ -187,7 +185,7 @@ public:
     * @param value The value to serialize.
     * @return A pair variable that stores the original value.
     */
-    static property_value serialize(bool value)
+    static cow_player::property_value serialize(bool value)
     {
         return std::make_pair("bool", boost::lexical_cast<std::string>(value));
     }
@@ -213,6 +211,7 @@ public:
 
 
 
+
 /**
  *  This class is a general configuration class that loads
  *  and saves configurations.
@@ -220,6 +219,7 @@ public:
 class base_configuration
 {
 public:
+    
     base_configuration();
 
    /**
@@ -261,17 +261,36 @@ public:
     template <typename T>
     T get_property(const std::string& name, T default_value) const
     {
-        property_map::const_iterator item = property_map_.find(name);
+        cow_player::property_map::const_iterator item = property_map_.find(name);
         if (item == property_map_.end())
             return default_value;
 
         return serializer<T>::deserialize(item->second.second);
     }
 
-private:
-    typedef std::map<std::string, property_value> property_map;
+    /**
+     * Returns the property_map (a key,value) map containing 
+     * all the settings and their values
+     *
+     * @return A property_map with all the read settings
+     */
+    cow_player::property_map settings() const {
+        return property_map_;
+    }
+    
+    /**
+     * Sets the property_map (a key,value) map containing 
+     * all the settings and their values
+     *
+     * @param A property_map with all the settings
+     */
+    void settings(cow_player::property_map map){
+        property_map_ = map;
+    }
 
-    property_map property_map_;
+
+private:
+    cow_player::property_map property_map_;
 };
 
 }

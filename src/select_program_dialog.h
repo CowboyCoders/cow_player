@@ -21,7 +21,6 @@ public:
     /**
      * Creates and initializes a new dialog
      *
-     * @param cow_client A pointer to client which the main application uses
      * @param parent A pointer to the creator of the window
      */
     select_program_dialog(QWidget *parent = 0);
@@ -33,6 +32,11 @@ public:
      */
     void populate_list(size_t timeout);
     
+    /**
+     * Returns the program info for the program the user selected in the list
+     *
+     * @return A pointer to the program, 0 is the user didn't select anything
+     */
     const libcow::program_info* selected_program()
     {
         if(connected_ && selected_program_index_ >= 0)
@@ -53,6 +57,11 @@ public:
         return is_populated_;
     }
 
+    /**
+     * Set's the url to the program table server
+     *
+     * @param url The url to the server
+     */
     void set_program_table_url(const std::string& url) { program_table_url_ = url; }
 
 protected:
@@ -78,6 +87,7 @@ private:
 private slots:
     void on_buttonBox_accepted();
     void handle_download_completed(bool result);
+    void current_item_changed();
 
 signals:
     void download_completed(bool result);

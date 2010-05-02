@@ -9,4 +9,10 @@
 <property name="program_table_url" type="url">
     cowboycoders.se/program_table.xml
 </property>
+<property name="critical_window" type="int">
+    5
+</property>
+<property name="critical_window_timeout" type="ms">
+    3000
+</property>
 </info>

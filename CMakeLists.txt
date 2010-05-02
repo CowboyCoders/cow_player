@@ -19,6 +19,11 @@ if(NOT EXISTS cow_player_config.xml)
     file(COPY ${COW_PLAYER_SOURCE_DIR}/src/cow_player_config.xml DESTINATION .)
 endif(NOT EXISTS cow_player_config.xml)
 
+if(NOT EXISTS player_icon.png)
+    file(COPY ${COW_PLAYER_SOURCE_DIR}/img/player_icon.png DESTINATION .)
+endif(NOT EXISTS player_icon.png)
+
+
 if(UNIX)
     ####################### IMPORTANT ###########################
     # You must set the enviroment variable LIBCOW_PATH in your  #
@@ -112,7 +117,6 @@ set(cow_player_SRCS
     ${COW_PLAYER_SOURCE_DIR}/src/piece_widget.cpp
     ${COW_PLAYER_SOURCE_DIR}/src/video_player.cpp    
     ${COW_PLAYER_SOURCE_DIR}/src/configuration.cpp
-    ${COW_PLAYER_SOURCE_DIR}/src/client_configuration.cpp
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxml.cpp
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxmlerror.cpp
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxmlparser.cpp
@@ -123,6 +127,7 @@ set(cow_player_INCLUDES
     ${COW_PLAYER_SOURCE_DIR}/src/client_configuration.h
     ${COW_PLAYER_SOURCE_DIR}/src/cow_io_device.h
     ${COW_PLAYER_SOURCE_DIR}/src/list_item.h
+    ${COW_PLAYER_SOURCE_DIR}/src/cow_player_types.h
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxml.h
 )
 

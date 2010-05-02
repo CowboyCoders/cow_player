@@ -1,4 +1,7 @@
 #include <iostream>
+#include <QDialogButtonBox>
+#include <QPushButton>
+
 
 #include "select_program_dialog.h"
 #include "ui_select_program_dialog.h"
@@ -14,12 +17,23 @@ select_program_dialog::select_program_dialog(QWidget *parent) :
     disp_(0)
 {
     ui->setupUi(this);
+    QPushButton* ok_button = ui->buttonBox->button(QDialogButtonBox::Ok);
+    ok_button->setDisabled(true);
     connect(this,SIGNAL(download_completed(bool)),this,SLOT(handle_download_completed(bool)));
+    connect(ui->program_list_,SIGNAL(itemSelectionChanged()),this,SLOT(current_item_changed()));
 }
 
 select_program_dialog::~select_program_dialog()
 {
     delete ui;
+}
+    
+void select_program_dialog::current_item_changed()
+{
+    if(connected_) {
+        QPushButton* ok_button = ui->buttonBox->button(QDialogButtonBox::Ok);
+        ok_button->setDisabled(false);
+    }
 }
 
 void select_program_dialog::changeEvent(QEvent *e)
