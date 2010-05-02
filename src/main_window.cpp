@@ -73,6 +73,7 @@ void main_window::setup_ui()
     ui->actionFullscreen->setChecked(fullscreen_mode_);
     
     // Connect UI gauges
+    ui->seekSlider->setTracking(false);
     ui->seekSlider->setMediaObject(media_object_);
     ui->volumeSlider->setAudioOutput(audio_output_);
    
