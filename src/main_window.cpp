@@ -1,6 +1,7 @@
 #include "main_window.h"
 #include "ui_main_window.h"
 
+
 #include <boost/shared_ptr.hpp>
 #include <boost/log/trivial.hpp>
 
