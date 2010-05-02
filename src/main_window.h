@@ -99,7 +99,6 @@ private slots:
     void stop_action_triggered();
 
     void tick(qint64 time);
-    void buffer_status(int percent_filled);
     void total_time_changed(qint64 total_time);
 
 signals:

@@ -103,18 +103,17 @@ void main_window::load_config_file()
 	try {
         config_.load(config_filename);
 	} catch (cow_player::configuration::exceptions::load_config_error e) {
-        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: could not open config file!";
+        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: could not load config file "
+                                   << config_filename;
+        BOOST_LOG_TRIVIAL(warning) << "cow_player: load config error was: " << e.what();
 	}
         
     settings_dialog_.set_configuration(&config_);
-   
-    try {
-        BOOST_LOG_TRIVIAL(debug) << "cow_player: main_window: constructor: config_.get_download_dir: " << config_.get_download_dir();
-        BOOST_LOG_TRIVIAL(debug) << "cow_player: main_window: constructor: config_.get_bittorrent_port: " << config_.get_bittorrent_port();
-        BOOST_LOG_TRIVIAL(debug) << "cow_player: main_window: constructor: config_.get_program_table_url: " << config_.get_program_table_url();
-    } catch (cow_player::configuration::exceptions::conversion_error e) {
-        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
-    }
+  
+    BOOST_LOG_TRIVIAL(debug) << "cow_player: configuration:";
+    BOOST_LOG_TRIVIAL(debug) << "cow_player: download_dir: " << config_.get_download_dir();
+    BOOST_LOG_TRIVIAL(debug) << "cow_player: bittorrent_port: " << config_.get_bittorrent_port();
+    BOOST_LOG_TRIVIAL(debug) << "cow_player: program_table_url: " << config_.get_program_table_url();
 }
 
 void main_window::init_client()
@@ -122,14 +121,7 @@ void main_window::init_client()
   	client_.start_logger();
     
     set_download_dir(); 
-   
-    int bt_port = 55678; // a random port number as default
-    try {
-        bt_port = config_.get_bittorrent_port();
-    } catch (cow_player::configuration::exceptions::conversion_error e) {
-        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
-    }
-    client_.set_bittorrent_port(bt_port);
+    client_.set_bittorrent_port(config_.get_bittorrent_port());
 }
     
 void main_window::on_actionAbout_triggered()
@@ -139,14 +131,7 @@ void main_window::on_actionAbout_triggered()
     
 void main_window::set_download_dir()
 {
-    std::string download_dir = "."; // use current directory as default
-    try {
-        download_dir = config_.get_download_dir();
-    } catch (cow_player::configuration::exceptions::conversion_error e) {
-        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
-    }
-    
-    client_.set_download_directory(download_dir); 
+    client_.set_download_directory(config_.get_download_dir()); 
 }
 
 void main_window::register_download_devices()
@@ -311,11 +296,8 @@ void main_window::on_request_complete(std::vector<int> pieces)
 std::vector<int> main_window::startup_pieces()
 {
     std::vector<int> pieces;
-    pieces.push_back(0);
-    pieces.push_back(1);
-    pieces.push_back(2);
-    pieces.push_back(3);
-    pieces.push_back(4);
+    for(int i = 0; i < 5; ++i)
+        pieces.push_back(i);
     pieces.push_back(download_ctrl_->num_pieces()-1);
     return pieces;
 }
@@ -344,17 +326,22 @@ void main_window::media_stateChanged()
 {
     bool buffering = iodevice_ && iodevice_->is_buffering();
 
-    if (media_object_->state() == Phonon::LoadingState) {
-        statusBar()->showMessage("Loading...");
-    } else if (media_object_->state() == Phonon::PlayingState) {
-        statusBar()->showMessage("Playing");
-        stopped_ = false;
-    } else if (media_object_->state() == Phonon::PausedState) {
-        if(!stopped_) {
-            statusBar()->showMessage("Paused");
-        }
-    } else if(media_object_->state()==Phonon::ErrorState) {
-		this->statusBar()->showMessage(media_object_->errorString());
+    switch(media_object_->state()) {
+        case Phonon::LoadingState:
+            statusBar()->showMessage("Loading...");
+            break;
+        case Phonon::PlayingState:
+            statusBar()->showMessage("Playing");
+            stopped_ = false;
+            break;
+        case Phonon::PausedState:
+            if(!stopped_) {
+                statusBar()->showMessage("Paused");
+            }
+            break;
+        case Phonon::ErrorState:
+		    statusBar()->showMessage(media_object_->errorString());
+            break;
     }
 }
 
@@ -384,15 +371,6 @@ void main_window::stop_action_triggered()
         stop_playback();
         statusBar()->showMessage("Stopped");
     }
-}
-
-void main_window::buffer_status(int percent_filled)
-{
-#ifdef WIN32
-    static char buf[256];
-    sprintf(buf, "Buffering: %d", percent_filled);
-    ::OutputDebugString(buf);
-#endif
 }
 
 void main_window::tick(qint64 time)
