@@ -130,7 +130,7 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
-    <addaction name="actionAbout_CowPlayer"/>
+    <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -167,7 +167,7 @@
     <string>Fullscreen</string>
    </property>
   </action>
-  <action name="actionAbout_CowPlayer">
+  <action name="actionAbout">
    <property name="text">
     <string>About CowPlayer...</string>
    </property>

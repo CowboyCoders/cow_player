@@ -148,6 +148,7 @@ set(cow_player_MOCS
     ${COW_PLAYER_SOURCE_DIR}/src/piece_dialog.h    
     ${COW_PLAYER_SOURCE_DIR}/src/select_program_dialog.h
     ${COW_PLAYER_SOURCE_DIR}/src/settings_dialog.h
+    ${COW_PLAYER_SOURCE_DIR}/src/about_dialog.h
 )
 
 SET(cow_player_UIS
@@ -156,6 +157,7 @@ SET(cow_player_UIS
     ${COW_PLAYER_SOURCE_DIR}/src/piece_dialog.ui    
     ${COW_PLAYER_SOURCE_DIR}/src/select_program_dialog.ui    
     ${COW_PLAYER_SOURCE_DIR}/src/settings_dialog.ui    
+    ${COW_PLAYER_SOURCE_DIR}/src/about_dialog.ui
 )
 
 # build ui_XXX files from the XML-style .ui files

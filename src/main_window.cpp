@@ -18,6 +18,7 @@ main_window::main_window(QWidget *parent) :
     piece_dialog_(this),
     select_program_dialog_(this),
     settings_dialog_(this),
+    about_dialog_(this),
     client_(),
     download_ctrl_(0),
     iodevice_(0),
@@ -56,6 +57,7 @@ void main_window::setup_actions()
     connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(media_stateChanged()));
     connect(ui->videoPlayer, SIGNAL(leaveFullscreen()), this, SLOT(leaveFullscreen_triggered()));
     connect(this,SIGNAL(startup_complete()),this,SLOT(start_io_device()));
+
 }
 
 void main_window::setup_ui()
@@ -116,15 +118,9 @@ void main_window::load_config_file()
 void main_window::init_client()
 {
   	client_.start_logger();
-   
-    std::string download_dir = "."; // use current directory as default
-    try {
-        download_dir = config_.get_download_dir();
-    } catch (cow_player::configuration::exceptions::conversion_error e) {
-        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
-    }
-    client_.set_download_directory(download_dir); 
     
+    set_download_dir(); 
+   
     int bt_port = 55678; // a random port number as default
     try {
         bt_port = config_.get_bittorrent_port();
@@ -132,6 +128,23 @@ void main_window::init_client()
         BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
     }
     client_.set_bittorrent_port(bt_port);
+}
+    
+void main_window::on_actionAbout_triggered()
+{
+    about_dialog_.show();
+}
+    
+void main_window::set_download_dir()
+{
+    std::string download_dir = "."; // use current directory as default
+    try {
+        download_dir = config_.get_download_dir();
+    } catch (cow_player::configuration::exceptions::conversion_error e) {
+        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
+    }
+    
+    client_.set_download_directory(download_dir); 
 }
 
 void main_window::register_download_devices()
@@ -222,12 +235,13 @@ void main_window::changeEvent(QEvent *e)
 
 void main_window::closeEvent(QCloseEvent* e)
 {
+    config_.save(config_filename);
     e->accept();
 }
 
 void main_window::on_actionExit_triggered()
 {
-    QApplication::quit();
+    close();
 }
 
 void main_window::on_actionFullscreen_triggered()
@@ -237,20 +251,18 @@ void main_window::on_actionFullscreen_triggered()
 
 void main_window::on_actionShow_program_list_triggered()
 {
-    if(!select_program_dialog_.is_populated()) {
-        std::string program_table_url = "";
-        
-        try{
-            program_table_url = config_.get_program_table_url();
-        } catch (cow_player::configuration::exceptions::conversion_error e) {
-            BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
-        }
-
-        select_program_dialog_.set_program_table_url(program_table_url);
-        size_t timeout = 15; // in seconds
-        select_program_dialog_.populate_list(timeout);
-    }
+    std::string program_table_url = "";
     
+    try{
+        program_table_url = config_.get_program_table_url();
+    } catch (cow_player::configuration::exceptions::conversion_error e) {
+        BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: conversion error! error: " << e.what(); 
+    }
+
+    select_program_dialog_.set_program_table_url(program_table_url);
+    size_t timeout = 15; // in seconds
+    select_program_dialog_.populate_list(timeout);
+
     select_program_dialog_.show();
     
     if(select_program_dialog_.exec() == QDialog::Accepted) {

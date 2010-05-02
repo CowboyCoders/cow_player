@@ -6,6 +6,7 @@
 #include "settings_dialog.h"
 #include "client_configuration.h"
 #include "cow_io_device.h"
+#include "about_dialog.h"
 
 #include <QAction>
 #include <QtGui/QMainWindow>
@@ -51,6 +52,9 @@ private:
     
     bool start_download(const libcow::program_info& program_info);
     void stop_download();
+
+    void set_download_dir();
+    
     std::vector<int> startup_pieces();
 
     
@@ -64,6 +68,7 @@ private:
     piece_dialog piece_dialog_;
     select_program_dialog select_program_dialog_;
     settings_dialog settings_dialog_;
+    about_dialog about_dialog_;
     
     libcow::cow_client client_;
     libcow::download_control* download_ctrl_;
@@ -87,6 +92,7 @@ private slots:
     void on_actionFullscreen_triggered();
     void on_actionPreferences_triggered();
     void on_actionExit_triggered();
+    void on_actionAbout_triggered();
     void leaveFullscreen_triggered();
     void play_action_triggered();
     void pause_action_triggered();
