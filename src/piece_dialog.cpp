@@ -4,6 +4,7 @@
 
 #include <boost/bind.hpp>
 #include <cow/cow.hpp>
+#include <iostream>
 
 // predefined colors for different download devices
 static QColor grey = QColor::fromRgb(220,220,220);

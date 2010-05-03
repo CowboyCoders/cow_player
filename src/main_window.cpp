@@ -298,6 +298,7 @@ std::vector<int> main_window::startup_pieces()
 
 void main_window::on_startup_complete()
 {
+    download_ctrl_->pre_buffer(startup_pieces());
     download_ctrl_->invoke_when_downloaded(startup_pieces(),boost::bind(&main_window::on_request_complete,this,_1));
 }
 

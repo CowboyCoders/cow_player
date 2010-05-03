@@ -7,6 +7,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 // Block size in pixels
 const int block_size = 5;
