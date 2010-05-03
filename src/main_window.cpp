@@ -20,7 +20,6 @@ main_window::main_window(QWidget *parent) :
     select_program_dialog_(this),
     settings_dialog_(this),
     about_dialog_(this),
-    client_(),
     download_ctrl_(0),
     iodevice_(0),
     media_object_(0),
@@ -124,15 +123,16 @@ void main_window::load_config_file()
 
 void main_window::init_client()
 {
-    client_.set_download_directory(config_.get_download_dir()); 
-    client_.set_bittorrent_port(config_.get_bittorrent_port());
+    client_ = new libcow::cow_client;
+    client_->set_download_directory(config_.get_download_dir()); 
+    client_->set_bittorrent_port(config_.get_bittorrent_port());
 
-    client_.register_download_device_factory(
+    client_->register_download_device_factory(
         boost::shared_ptr<libcow::download_device_factory>(
             new libcow::on_demand_server_connection_factory()), 
         "http");
     
-    client_.register_download_device_factory(
+    client_->register_download_device_factory(
         boost::shared_ptr<libcow::download_device_factory>(
             new libcow::multicast_server_connection_factory()),
         "multicast");
@@ -178,7 +178,7 @@ bool main_window::start_download(const libcow::program_info& program_info)
 {
     reset_session();
 
-    download_ctrl_ = client_.start_download(program_info);
+    download_ctrl_ = client_->start_download(program_info);
     if (!download_ctrl_) {
         BOOST_LOG_TRIVIAL(error) << "cow_player: Could not play program.";
         return false;
@@ -208,7 +208,7 @@ void main_window::start_io_device()
 void main_window::stop_download()
 {
     if (download_ctrl_) {
-        client_.remove_download(download_ctrl_);
+        client_->remove_download(download_ctrl_);
         download_ctrl_ = 0;
     }
 }
