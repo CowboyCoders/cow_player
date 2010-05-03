@@ -383,7 +383,9 @@ void main_window::media_stateChanged()
             }
             break;
         case Phonon::ErrorState:
-		    statusBar()->showMessage(media_object_->errorString());
+            std::stringstream ss;
+            ss << "Media error: " << media_object_->errorString().toAscii().data();
+            statusBar()->showMessage(QString::fromAscii(ss.str().c_str()));
             BOOST_LOG_TRIVIAL(error) << "Media object error: " << media_object_->errorString().toAscii().data();
             break;
     }

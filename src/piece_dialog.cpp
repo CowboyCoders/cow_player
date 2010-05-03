@@ -1,10 +1,12 @@
 #include "piece_dialog.h"
 #include "ui_piece_dialog.h"
+#include <cow/cow.hpp>
+
 #include <QColor>
 #include <QLabel>
 #include <boost/bind.hpp>
-#include <cow/cow.hpp>
 #include <iostream>
+#include <cassert>
 
 // predefined colors for different download devices
 static QColor grey = QColor::fromRgb(220,220,220);
@@ -25,6 +27,10 @@ piece_dialog::piece_dialog(QWidget *parent) :
     std::vector<std::string> labels;
     labels.push_back("Missing");
     labels.push_back("Test");
+    labels.push_back("Test");
+    labels.push_back("Woooo");
+    labels.push_back("SOmetHiung");
+    labels.push_back("JDI82GH");
     set_legend(labels);
 
 }
@@ -49,7 +55,7 @@ void piece_dialog::changeEvent(QEvent *e)
 void piece_dialog::set_download_control(libcow::download_control* control)
 {
     std::vector<int>* state = new std::vector<int>(control->num_pieces());
-    control->current_state(state,boost::bind(&piece_dialog::received_state,this,control,_1));
+    control->current_state(state, boost::bind(&piece_dialog::received_state,this,control,_1));
 }
 
 void piece_dialog::received_state(libcow::download_control* control, std::vector<int>* state)
@@ -65,6 +71,9 @@ void piece_dialog::received_state(libcow::download_control* control, std::vector
     std::vector<std::string> labels;
     labels.push_back("Missing");
     labels.push_back("Test");
+    labels.push_back("Woooo");
+    labels.push_back("SOmetHiung");
+    labels.push_back("JDI82GH");
     set_legend(labels);
 }
 
@@ -75,6 +84,8 @@ void piece_dialog::piece_downloaded_callback(int piece_idx, int device)
 
 void piece_dialog::set_legend(const std::vector<std::string>& labels) 
 {
+    assert(sizeof(colors)/sizeof(QColor) > 0);
+
     const QObjectList& children = ui->legend->children(); //layout()->children();
     QObjectList::const_iterator wit = children.begin();
     for (; wit != children.end(); ++wit) {
@@ -87,8 +98,9 @@ void piece_dialog::set_legend(const std::vector<std::string>& labels)
     }
 
     std::vector<std::string>::const_iterator it = labels.begin();
-    for (; it != labels.end(); ++it) {
-        QFrame* item = create_legend_item(*it, QColor());
+    for (int i = 0; it != labels.end(); ++it, ++i) {
+        int ind = i % (sizeof(colors)/sizeof(QColor));
+        QFrame* item = create_legend_item(*it, colors[ind]);
         ui->legend->layout()->addWidget(item);
     }
 }
@@ -98,15 +110,21 @@ QFrame* piece_dialog::create_legend_item(const std::string& label, const QColor&
     QFrame* frame = new QFrame;
 
     QHBoxLayout* horizontalLayout = new QHBoxLayout(frame);
-    horizontalLayout->setContentsMargins(0, 0, 40, 0);
+    horizontalLayout->setContentsMargins(0, 0, 20, 0);
 
     QFrame* color_box = new QFrame(frame);
     color_box->setMinimumSize(QSize(10, 10));
     color_box->setMaximumSize(QSize(10, 10));
     color_box->setBaseSize(QSize(10, 10));
-    color_box->setStyleSheet(QString::fromUtf8("background: #24FF14;\n" "margin-top:1px;"));
-    color_box->setFrameShape(QFrame::StyledPanel);
-    color_box->setFrameShadow(QFrame::Raised);
+    color_box->setStyleSheet(QString::fromUtf8("margin-top:1px;"));
+    color_box->setFrameShape(QFrame::NoFrame);
+    color_box->setFrameShadow(QFrame::Plain);
+    color_box->setAutoFillBackground(true);
+
+    QPalette palette = color_box->palette();
+    //palette.setColor(foregroundRole(), color);
+    palette.setColor(backgroundRole(), color);    
+    color_box->setPalette(palette);
 
     horizontalLayout->addWidget(color_box);
 
