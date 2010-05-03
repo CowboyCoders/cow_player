@@ -6,14 +6,26 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>498</width>
-    <height>265</height>
+    <width>410</width>
+    <height>272</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Preferences</string>
   </property>
+  <property name="sizeGripEnabled">
+   <bool>false</bool>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetFixedSize</enum>
+   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
@@ -30,7 +42,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>556</width>
+         <width>10</width>
          <height>5</height>
         </size>
        </property>
@@ -64,7 +76,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>375</width>
+         <width>10</width>
          <height>5</height>
         </size>
        </property>
@@ -111,7 +123,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>375</width>
+         <width>10</width>
          <height>5</height>
         </size>
        </property>
@@ -151,7 +163,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>556</width>
+         <width>10</width>
          <height>5</height>
         </size>
        </property>
@@ -182,7 +194,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>556</width>
+         <width>10</width>
          <height>5</height>
         </size>
        </property>
