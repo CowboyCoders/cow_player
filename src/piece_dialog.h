@@ -12,24 +12,21 @@ namespace Ui {
 class piece_dialog : public QDialog {
     Q_OBJECT
 public:
-    piece_dialog(QWidget *parent = NULL, libcow::download_control* = NULL);
+    piece_dialog(QWidget *parent = 0);
     ~piece_dialog();
-    void set_download_control(libcow::download_control*);
+    void set_download_control(libcow::download_control& control);
 
 protected:
     void changeEvent(QEvent *e);
-    void showEvent(QShowEvent* e);
-	
 
 private:
+    void piece_downloaded_callback(int piece_idx, int device);
+    
     Ui::piece_dialog *ui;
-    libcow::download_control* download_ctrl_;
-    QTimer* timer_;
 
-private slots:
-    void pieceIndicator();
-    void debugPieceIndicator();
-
+signals:
+    void piece_downloaded(int piece_idx, int device);
+    
 };
 
 #endif // PIECE_DIALOG_HPP

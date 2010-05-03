@@ -1,25 +1,30 @@
 #include "piece_dialog.h"
 #include "ui_piece_dialog.h"
-#include <cow/cow.hpp>
-#include <stdio.h>
+#include <QColor>
 
-piece_dialog::piece_dialog(QWidget *parent , libcow::download_control* dctrl) :
+#include <boost/bind.hpp>
+#include <cow/cow.hpp>
+
+// predefined colors for different download devices
+static QColor grey = QColor::fromRgb(220,220,220);
+static QColor forest_green = QColor::fromRgb(0,255,30);
+static QColor ruby_red = QColor::fromRgb(255,200,0); 
+static QColor golden_yellow = QColor::fromRgb(255,0,150);
+static QColor turqoise = QColor::fromRgb(0,206,209);
+
+static QColor colors[] = {grey,forest_green,ruby_red,golden_yellow,turqoise};
+
+piece_dialog::piece_dialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::piece_dialog),
-    download_ctrl_(dctrl)
+    ui(new Ui::piece_dialog)
 {
     ui->setupUi(this);
-
-     timer_ = new QTimer(this);
-     timer_->setInterval(100);
-
-     connect(timer_, SIGNAL(timeout()), this, SLOT(pieceIndicator()));
+    connect(this,SIGNAL(piece_downloaded(int,int)),ui->pieceWidget,SLOT(piece_downloaded(int,int)));
 }
 
 piece_dialog::~piece_dialog()
 {
     delete ui;
-    delete timer_;
 }
 
 void piece_dialog::changeEvent(QEvent *e)
@@ -34,48 +39,20 @@ void piece_dialog::changeEvent(QEvent *e)
     }
 }
 
-void piece_dialog::set_download_control(libcow::download_control* dctrl)
+void piece_dialog::set_download_control(libcow::download_control& control)
 {
-    download_ctrl_ = dctrl;
-    pieceIndicator();
+    std::vector<int> state(control.num_pieces());
+    control.current_state(state);
+    ui->pieceWidget->set_piece_states(state);
+    
+    ui->pieceWidget->set_device_map(control.get_device_names());
+    ui->pieceWidget->set_colors(std::vector<QColor>(colors, colors + sizeof(colors)/sizeof(QColor)));
+
+    control.set_piece_finished_callback(boost::bind(&piece_dialog::piece_downloaded_callback,this,_1,_2));
+    
 }
 
-void piece_dialog::showEvent(QShowEvent* e)
+void piece_dialog::piece_downloaded_callback(int piece_idx, int device)
 {
-    pieceIndicator();
-}
-
-void piece_dialog::pieceIndicator()
-{
-    if(download_ctrl_ != NULL ){
-    libcow::progress_info progress = download_ctrl_->get_progress();
-    std::vector<int> origins = progress.piece_origin();
-    libtorrent::bitfield have_piece = progress.downloaded();
-    std::vector<piece_state> piece_states(origins.size());
-    for (size_t i = 0; i < piece_states.size(); i++) {
-        if(have_piece[i] == 1) {
-            piece_states[i] = static_cast<piece_state>(origins[i] + 1);
-        } else {
-            piece_states[i] = static_cast<piece_state>(0);
-        }
-
-    }
-    ui->pieceWidget->set_piece_states(piece_states);
-
-    timer_->start();
-    }
-}
-
-void piece_dialog::debugPieceIndicator()
-{    
-    if(download_ctrl_ != NULL ){
-        std::cout << "update progress " << download_ctrl_->piece_length() << std::endl;
-        //download_ctrl_->get_progress();
-        libcow::progress_info info = download_ctrl_->get_progress();
-        std::cout << "progress: " << info.progress() << std::endl;
-        const std::vector<int>& vec = info.piece_origin();
-        //showEvent(0);
-    }
-
-    //ui->pieceWidget->update_piece_state(rand()%10000, static_cast<piece_state>(rand() % 3 + 1));
+    emit piece_downloaded(piece_idx,device);
 }

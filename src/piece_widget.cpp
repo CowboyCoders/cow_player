@@ -4,8 +4,9 @@
 #include <QPainter>
 #include <QToolTip>
 #include <QMouseEvent>
-#include <cstdio>
+#include <sstream>
 #include <algorithm>
+#include <cassert>
 
 // Block size in pixels
 const int block_size = 5;
@@ -45,15 +46,25 @@ void piece_widget::timed_repaint()
     viewport()->update(); // Redraw. TODO: Dont redraw if not neccessary
 }
 
-void piece_widget::set_piece_states(const std::vector<piece_state>& piece_states)
+void piece_widget::set_piece_states(const std::vector<int>& piece_states)
 {
     piece_states_ = piece_states;
     refresh_scrollbar();
 }
 
-void piece_widget::update_piece_state(size_t piece_index, piece_state state)
+void piece_widget::set_device_map(const std::map<int,std::string>& map)
 {
-    piece_states_[piece_index] = state;
+    device_map_ = map;
+}
+
+void piece_widget::set_colors(const std::vector<QColor>& colors)
+{
+    colors_ = colors;
+}
+
+void piece_widget::piece_downloaded(int piece_index, int device)
+{
+    piece_states_[piece_index] = device;
 
     if (!repaint_needed_) {
 
@@ -129,13 +140,6 @@ bool piece_widget::event(QEvent* e)
 {
      if (e->type() == QEvent::ToolTip) {
          QHelpEvent* helpEvent = static_cast<QHelpEvent *>(e);
-         /*
-         int index = piece_at(helpEvent->pos());
-         if (index != -1)
-             QToolTip::showText(helpEvent->globalPos(), itoa(index, NULL, 10));
-         else
-             QToolTip::showText(helpEvent->globalPos(), "Wpppppp");
-            */
      }
 
      return QAbstractScrollArea::event(e);
@@ -161,13 +165,10 @@ void piece_widget::resizeEvent(QResizeEvent* e)
 void piece_widget::paintEvent(QPaintEvent* e)
 {
     QAbstractScrollArea::paintEvent(e);
-
-    QColor missing_color(220, 220, 220);
-    QColor bittorrent_color(0, 255, 30);
-    QColor ondemand_color(255, 200, 0);
-    QColor multicast_color(255, 0, 150);
-
-    QColor brushes[]= { missing_color, bittorrent_color, multicast_color, ondemand_color  };
+    
+    if(colors_.empty() || piece_states_.empty()) {
+        return;
+    }
 
     // Unset repaint flags and timer
     repaint_needed_ = false;
@@ -193,39 +194,23 @@ void piece_widget::paintEvent(QPaintEvent* e)
 
     for (int r = 0; r < nrows; r++) {
         for (int c = 0; c < ncols && piece_index < piece_states_.size(); c++) {
-
-            painter.setBrush(brushes[piece_states_[piece_index++]]);
+            
+            painter.setBrush(colors_[piece_states_[piece_index++] % colors_.size()]);
 
             painter.drawRect(QRect(c*(block_size+margin) + margin,
                 offset + r*(block_size+margin)+margin, block_size, block_size));
         }
     }
-
 }
 
 void piece_widget::mouseMoveEvent(QMouseEvent* e)
 {
     int piece = piece_at(e->pos());
+
     if (piece != -1) {
-        static char buf[60] = {0};
-        switch (piece_states_[piece]) {
-        case missing:
-            sprintf(buf, "%d: Missing", piece);
-            break;
-        case bittorrent:
-            sprintf(buf, "%d: BitTorrent", piece);
-            break;
-        case multicast:
-            sprintf(buf, "%d: Multicast", piece);
-            break;
-        case ondemand:
-            sprintf(buf, "%d: OnDemand", piece);
-            break;
-        default:
-            sprintf(buf, "%d: Unknown source", piece);
-            break;
-        }
-        QToolTip::showText(e->globalPos(), buf, this);
+        std::stringstream ss;
+        ss << piece << " : " << device_map_[piece];
+        QToolTip::showText(e->globalPos(), QString(ss.str().c_str()), this);
     } else {
         QToolTip::hideText();
     }

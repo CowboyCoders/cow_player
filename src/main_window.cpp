@@ -118,8 +118,6 @@ void main_window::load_config_file()
 
 void main_window::init_client()
 {
-  	client_.start_logger();
-    
     set_download_dir(); 
     client_.set_bittorrent_port(config_.get_bittorrent_port());
 }
@@ -166,13 +164,9 @@ bool main_window::start_download(const libcow::program_info& program_info)
         return false;
     }
 
-    piece_dialog_.set_download_control(download_ctrl_);
+    piece_dialog_.set_download_control(*download_ctrl_);
     
-    if(download_ctrl_->is_running()) {
-        download_ctrl_->wait_for_pieces(startup_pieces(),boost::bind(&main_window::on_request_complete,this,_1));
-    } else {
-        download_ctrl_->wait_for_startup(boost::bind(&main_window::on_startup_complete,this));
-    }
+    download_ctrl_->invoke_after_init(boost::bind(&main_window::on_startup_complete,this));
     
     statusBar()->showMessage("Loading...");
     return true;
@@ -304,7 +298,7 @@ std::vector<int> main_window::startup_pieces()
 
 void main_window::on_startup_complete()
 {
-    download_ctrl_->wait_for_pieces(startup_pieces(),boost::bind(&main_window::on_request_complete,this,_1));
+    download_ctrl_->invoke_when_downloaded(startup_pieces(),boost::bind(&main_window::on_request_complete,this,_1));
 }
 
 void main_window::on_actionPieces_triggered()
