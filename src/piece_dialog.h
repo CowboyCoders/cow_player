@@ -2,7 +2,9 @@
 #define PIECE_DIALOG_HPP
 
 #include <QDialog>
-#include <QTimer>
+#include <QColor>
+#include <QFrame>
+
 #include <cow/cow.hpp>
 
 namespace Ui {
@@ -20,6 +22,9 @@ protected:
     void changeEvent(QEvent *e);
 
 private:
+    void set_legend(const std::vector<std::string>& labels);
+    QFrame* create_legend_item(const std::string& label, const QColor& color);
+
     void piece_downloaded_callback(int piece_idx, int device);
     void received_state(libcow::download_control* control, std::vector<int>* state);
 

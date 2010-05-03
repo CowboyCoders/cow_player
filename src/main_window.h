@@ -82,7 +82,7 @@ private:
     settings_dialog settings_dialog_;
     about_dialog about_dialog_;
     
-    libcow::cow_client client_;
+    libcow::cow_client* client_;
     libcow::download_control* download_ctrl_;
     cow_io_device* iodevice_;
 
