@@ -42,17 +42,19 @@ void piece_dialog::changeEvent(QEvent *e)
 
 void piece_dialog::set_download_control(libcow::download_control* control)
 {
-    std::vector<int> state;
-    BOOST_LOG_TRIVIAL(info) << "piece_dialog: before set state";
-    control->current_state(state);
-    BOOST_LOG_TRIVIAL(info) << "piece_dialog: after set state";
-    ui->pieceWidget->set_piece_states(state);
+    std::vector<int>* state = new std::vector<int>(control->num_pieces());
+    control->current_state(state,boost::bind(&piece_dialog::received_state,this,control,_1));
+}
+
+void piece_dialog::received_state(libcow::download_control* control, std::vector<int>* state)
+{
+    ui->pieceWidget->set_piece_states(*state);
     
     ui->pieceWidget->set_device_map(control->get_device_names());
     ui->pieceWidget->set_colors(std::vector<QColor>(colors, colors + sizeof(colors)/sizeof(QColor)));
-
     control->set_piece_finished_callback(boost::bind(&piece_dialog::piece_downloaded_callback,this,_1,_2));
-    
+
+    delete state;
 }
 
 void piece_dialog::piece_downloaded_callback(int piece_idx, int device)

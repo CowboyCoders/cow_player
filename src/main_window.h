@@ -22,14 +22,6 @@ namespace Ui {
     class main_window;
 }
 
-enum player_state {
-    loading,
-    buffering,
-    playing,
-    paused,
-    stopped
-};
-
 class main_window : public QMainWindow {
     Q_OBJECT
 public:
@@ -62,8 +54,18 @@ private:
     
     bool start_download(const libcow::program_info& program_info);
     void stop_download();
+    
+    enum player_state {
+        loading,
+        buffering,
+        playing,
+        paused,
+        stopped
+    };
 
     player_state get_player_state() const;
+    
+
     
     std::vector<int> startup_pieces();
 

@@ -213,25 +213,25 @@ void main_window::stop_download()
     }
 }
 
-player_state main_window::get_player_state() const
+main_window::player_state main_window::get_player_state() const
 {
     bool buffering = iodevice_ && iodevice_->is_buffering();
 
     switch(media_object_->state()) {
-    case Phonon::LoadingState: return player_state::loading;
-    case Phonon::PlayingState: return player_state::playing;
+    case Phonon::LoadingState: return main_window::loading;
+    case Phonon::PlayingState: return main_window::playing;
     case Phonon::PausedState:
         if (stopped_) {
-            return player_state::stopped;
+            return main_window::stopped;
         } else if (buffering) {
-            return player_state::buffering;
+            return main_window::buffering;
         } else {
-            return player_state::paused;
+            return main_window::paused;
         }
     }
 
     // Default player state if not matched by the above
-    return player_state::stopped;
+    return main_window::stopped;
 }
 
 void main_window::set_fullscreen(bool fullscreen)
@@ -314,7 +314,7 @@ void main_window::set_playback_buttons_disabled(bool state)
 
 void main_window::update_play_pause_button()
 {
-    if (get_player_state() == player_state::playing) {
+    if (get_player_state() == main_window::playing) {
         play_action_->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
         play_action_->setIconText(tr("Pause"));
     } else {
@@ -339,8 +339,7 @@ std::vector<int> main_window::startup_pieces()
 
 void main_window::on_startup_complete()
 {
-    std::cout << "got invok after init" << std::endl;
-    //piece_dialog_.set_download_control(download_ctrl_); // set here, since by now disk pieces will be read
+    piece_dialog_.set_download_control(download_ctrl_); // set here, since by now disk pieces will be read
     download_ctrl_->pre_buffer(startup_pieces());
     download_ctrl_->invoke_when_downloaded(startup_pieces(),boost::bind(&main_window::on_request_complete,this,_1));
 }
@@ -395,11 +394,11 @@ void main_window::media_stateChanged()
 void main_window::play_action_triggered()
 {
     switch (get_player_state()) {
-    case player_state::playing:
+    case main_window::playing:
         media_object_->pause();
         break;
-    case player_state::stopped:
-    case player_state::paused:
+    case main_window::stopped:
+    case main_window::paused:
         media_object_->play();
         break;
     }

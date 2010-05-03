@@ -21,6 +21,9 @@ protected:
 
 private:
     void piece_downloaded_callback(int piece_idx, int device);
+    void received_state(libcow::download_control* control, std::vector<int>* state);
+
+    libcow::download_control* download_control_; // do not delete this one
     
     Ui::piece_dialog *ui;
 
