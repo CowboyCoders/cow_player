@@ -1,7 +1,7 @@
 #include "piece_dialog.h"
 #include "ui_piece_dialog.h"
 #include <QColor>
-
+#include <QLabel>
 #include <boost/bind.hpp>
 #include <cow/cow.hpp>
 #include <iostream>
