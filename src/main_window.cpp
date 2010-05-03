@@ -164,7 +164,6 @@ bool main_window::start_download(const libcow::program_info& program_info)
         return false;
     }
 
-    piece_dialog_.set_download_control(*download_ctrl_);
     
     download_ctrl_->invoke_after_init(boost::bind(&main_window::on_startup_complete,this));
     
@@ -273,7 +272,7 @@ void main_window::start_io_device()
     if(media_source_ != 0) {
         delete media_source_;
     }
-    
+   
     iodevice_ = new cow_io_device(media_object_, download_ctrl_);
     media_source_ = new Phonon::MediaSource(iodevice_);
     
@@ -284,6 +283,7 @@ void main_window::start_io_device()
 
 void main_window::on_request_complete(std::vector<int> pieces)
 {
+    std::cout << "got all pieces" << std::endl;
     emit startup_complete(); 
 }
 
@@ -298,6 +298,8 @@ std::vector<int> main_window::startup_pieces()
 
 void main_window::on_startup_complete()
 {
+    std::cout << "got invok after init" << std::endl;
+    piece_dialog_.set_download_control(download_ctrl_); // set here, since by now disk pieces will be read
     download_ctrl_->pre_buffer(startup_pieces());
     download_ctrl_->invoke_when_downloaded(startup_pieces(),boost::bind(&main_window::on_request_complete,this,_1));
 }

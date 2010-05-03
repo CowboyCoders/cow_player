@@ -14,7 +14,7 @@ class piece_dialog : public QDialog {
 public:
     piece_dialog(QWidget *parent = 0);
     ~piece_dialog();
-    void set_download_control(libcow::download_control& control);
+    void set_download_control(libcow::download_control* control);
 
 protected:
     void changeEvent(QEvent *e);
