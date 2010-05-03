@@ -13,6 +13,11 @@ cow_io_device::cow_io_device(Phonon::MediaObject* media_object,
     size_ = download_control_->file_size();
 }
 
+cow_io_device::~cow_io_device()
+{
+    BOOST_LOG_TRIVIAL(debug) << "destroying cow_io_device";
+}
+
 void cow_io_device::set_blocking(bool blocking)
 {
     boost::mutex::scoped_lock lock(blocking_mutex_);
@@ -48,16 +53,25 @@ bool cow_io_device::open(OpenMode openMode)
 
 qint64 cow_io_device::size() const 
 {
+    if (!isOpen()) {
+        return -1;
+    }
+
     return size_;
 }
 
 bool cow_io_device::seek(qint64 pos)
 {
     BOOST_LOG_TRIVIAL(debug) << "seek() : offset " << pos;
+
     if(pos >= size_) {
         return false;
     } 
-    
+
+    if (!isOpen()) {
+        return false;
+    }
+   
     return QIODevice::seek(pos);
 }
 
@@ -81,12 +95,22 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
         {   // Update buffering flag
             boost::mutex::scoped_lock lock(buffering_mutex_);
             buffering_ = true;
-            media_object_->pause();
         }
+
+        media_object_->pause();
 
         int iter = 1;
         bool done = false;
         while (!done) {
+
+            if (!isOpen()) {
+                BOOST_LOG_TRIVIAL(debug) << "cow_io_device::readData: device is closed.";
+
+                boost::mutex::scoped_lock lock(buffering_mutex_);
+                buffering_ = false;
+
+                return -1;
+            }
 
             {   
                 boost::mutex::scoped_lock lock(blocking_mutex_);
@@ -106,10 +130,9 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
         {   // Update buffering flag
             boost::mutex::scoped_lock lock(buffering_mutex_);
             buffering_ = false;
-            media_object_->play();
         }
 
-        //media_object_->play();
+        media_object_->play();
     }
 
     libcow::utils::buffer buf(data, maxlen);

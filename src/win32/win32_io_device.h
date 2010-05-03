@@ -13,6 +13,7 @@ class cow_io_device : public QIODevice, public boost::noncopyable
 {
 public:
     cow_io_device(Phonon::MediaObject* media_object, libcow::download_control* download_control);
+    ~cow_io_device();
 
     void set_blocking(bool blocking);
 

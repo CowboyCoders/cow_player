@@ -22,6 +22,14 @@ namespace Ui {
     class main_window;
 }
 
+enum player_state {
+    loading,
+    buffering,
+    playing,
+    paused,
+    stopped
+};
+
 class main_window : public QMainWindow {
     Q_OBJECT
 public:
@@ -33,27 +41,29 @@ protected:
     void closeEvent(QCloseEvent* e);
 
 private:
-    void setup_phonon();
     void setup_actions();
     void setup_ui();
-    void setup_playbackLayout();
+    void setup_playback_buttons();
     
     void load_config_file();
     void init_client();
-    void register_download_devices();
     
     void stop_playback();
+
+    void reset_session();
     
     void on_startup_complete();
     void on_request_complete(std::vector<int> pieces);
     
     void set_fullscreen(bool fullscreen);
     void set_playback_buttons_disabled(bool state);
+
+    void update_play_pause_button();
     
     bool start_download(const libcow::program_info& program_info);
     void stop_download();
 
-    void set_download_dir();
+    player_state get_player_state() const;
     
     std::vector<int> startup_pieces();
 
@@ -95,11 +105,9 @@ private slots:
     void on_actionAbout_triggered();
     void leaveFullscreen_triggered();
     void play_action_triggered();
-    void pause_action_triggered();
     void stop_action_triggered();
 
     void tick(qint64 time);
-    void total_time_changed(qint64 total_time);
 
 signals:
     void startup_complete();
