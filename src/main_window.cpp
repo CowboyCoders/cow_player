@@ -75,7 +75,7 @@ void main_window::setup_actions()
     // Phonon events
     connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(media_stateChanged()));
     connect(media_object_, SIGNAL(finished ()), this, SLOT(media_finished()));
-    connect(media_object_, SIGNAL(tick(qint64)), this, SLOT(media_tick(qint64)));
+    //connect(media_object_, SIGNAL(tick(qint64)), this, SLOT(media_tick(qint64)));
     connect(ui->videoPlayer, SIGNAL(leaveFullscreen()), this, SLOT(leaveFullscreen_triggered()));
 
     // Signals concerning libcow
@@ -177,18 +177,24 @@ void main_window::stop_playback()
         stopped_ = true;
     }
 #else
-    media_object_->pause();
-    media_object_->seek(0);
-    stopped_ = true;
+    if(iodevice_ && media_source_ && media_object_) {
+        media_object_->pause();
+        // std::cout << "managed pause, now seeking" << std::endl;
+        media_object_->seek(1);
+        stopped_ = true;
+    }
 #endif
 }
 
 void main_window::reset_session()
 {
-    stop_playback();
 
 #ifdef WIN32
+    stop_playback();
     media_object_->clear();
+#else
+    media_object_->stop();
+    stopped_ = true;
 #endif
 
     if (iodevice_) {
@@ -204,8 +210,9 @@ void main_window::reset_session()
 
 bool main_window::start_download(const libcow::program_info& program_info)
 {
-    reset_session();
-    
+    if (media_object_->hasVideo()) {
+        reset_session();
+    }
 
     download_ctrl_ = client_->start_download(program_info);
     if (!download_ctrl_) {
