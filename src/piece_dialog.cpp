@@ -89,11 +89,13 @@ void piece_dialog::set_legend(const std::map<int, std::string>& devices)
     QObjectList::const_iterator wit = children.begin();
     for (; wit != children.end(); ++wit) {
         
+        /*
         if ((*wit)->isWidgetType()) {
             QWidget* w = reinterpret_cast<QWidget*>(*wit);
             ui->legend->layout()->removeWidget(w); // Really needed?
             delete w;
         }
+        */
     }
 
     std::map<int, std::string>::const_iterator it = devices.begin();

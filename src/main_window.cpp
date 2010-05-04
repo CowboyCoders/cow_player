@@ -167,6 +167,8 @@ void main_window::reset_session()
 {
     stop_playback();
 
+    media_object_->clear();
+
     if (iodevice_) {
         delete iodevice_;
         iodevice_ = 0;
@@ -175,11 +177,6 @@ void main_window::reset_session()
     if (media_source_) {
         delete media_source_;
         media_source_ = 0;
-    }
-
-    if (download_ctrl_) {
-        client_->remove_download(download_ctrl_);
-        download_ctrl_ = 0;
     }
 }
 
