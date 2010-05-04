@@ -219,7 +219,8 @@ bool main_window::start_download(const libcow::program_info& program_info)
         BOOST_LOG_TRIVIAL(error) << "cow_player: Could not play program.";
         return false;
     }
-    
+   
+    set_playback_buttons_disabled(true);
     int window = config_.get_critical_window();
     download_ctrl_->set_critical_window(window);
     
