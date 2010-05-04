@@ -177,16 +177,25 @@ void main_window::stop_playback()
         stopped_ = true;
     }
 #else
-    media_object_->pause();
-    media_object_->seek(0);
-    stopped_ = true;
+    if(iodevice_ && media_source_ && media_object_) {
+        media_object_->pause();
+        // std::cout << "managed pause, now seeking" << std::endl;
+        media_object_->seek(1);
+        stopped_ = true;
+    }
 #endif
 }
 
 void main_window::reset_session()
 {
+
+#ifdef WIN32
     stop_playback();
     media_object_->clear();
+#else
+    media_object_->stop();
+    stopped_ = true;
+#endif
 
     if (iodevice_) {
         delete iodevice_;
@@ -210,6 +219,12 @@ bool main_window::start_download(const libcow::program_info& program_info)
         BOOST_LOG_TRIVIAL(error) << "cow_player: Could not play program.";
         return false;
     }
+    
+    int window = config_.get_critical_window();
+    download_ctrl_->set_critical_window(window);
+    
+    int timeout = config_.get_critical_window_timeout();
+    download_ctrl_->set_critical_window_timeout(timeout);
     
     download_ctrl_->invoke_after_init(boost::bind(&main_window::on_startup_complete_callback, this));
 
