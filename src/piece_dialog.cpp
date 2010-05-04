@@ -61,12 +61,15 @@ void piece_dialog::set_download_control(libcow::download_control* control)
 void piece_dialog::received_state(libcow::download_control* control, std::vector<int>* state)
 {
     ui->pieceWidget->set_piece_states(*state);
-    
-    ui->pieceWidget->set_device_map(control->get_device_names());
     ui->pieceWidget->set_colors(std::vector<QColor>(colors, colors + sizeof(colors)/sizeof(QColor)));
     control->set_piece_finished_callback(boost::bind(&piece_dialog::piece_downloaded_callback,this,_1,_2));
-
     delete state;
+    control->get_device_names(boost::bind(&piece_dialog::received_devices,this,_1));
+}
+
+void piece_dialog::received_devices(std::map<int,std::string> devices)
+{
+    ui->pieceWidget->set_device_map(devices);
     
     std::vector<std::string> labels;
     labels.push_back("Missing");

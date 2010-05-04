@@ -27,6 +27,7 @@ private:
 
     void piece_downloaded_callback(int piece_idx, int device);
     void received_state(libcow::download_control* control, std::vector<int>* state);
+    void received_devices(std::map<int,std::string> devices);
 
     libcow::download_control* download_control_; // do not delete this one
     
