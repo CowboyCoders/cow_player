@@ -25,23 +25,12 @@ endif(NOT EXISTS player_icon.png)
 
 
 if(UNIX)
-    ####################### IMPORTANT ###########################
-    # You must set the enviroment variable LIBCOW_PATH in your  #
-    # .bashrc to be able to link to libcow!                     #
-    #                                                           #
-    # You can do this by executing:                             #
-    #   foo@computer:~$ gedit ~/.bashrc                         #
-    #                                                           #
-    # At the end of the file add the following:                 #
-    #   export LIBCOW_PATH=/path/to/p2pmediaplayer/trunk/libcow #
-    #                                                           #
-    # Then log out and log in, and the variable will be set!    #
-    # You can now build cow_player!                             #
-    ####################### IMPORTANT ###########################
-    message(STATUS "LIBCOW_PATH=$ENV{LIBCOW_PATH}")
+    # There is no longer any need to set the LIBCOW_PATH environment variable.
+	 set(LIBCOW_PATH "${COW_PLAYER_SOURCE_DIR}/../libcow")
+    message(STATUS "LIBCOW_PATH=${LIBCOW_PATH}")
 
-    set(LIBCOW_INCLUDE_DIR $ENV{LIBCOW_PATH}/include)
-    set(LIBCOW_LIBRARY $ENV{LIBCOW_PATH}/bin/libcowd.so)
+    set(LIBCOW_INCLUDE_DIR ${LIBCOW_PATH}/include)
+    set(LIBCOW_LIBRARY ${LIBCOW_PATH}/bin/libcowd.so)
     
     set(QT_QMAKE_EXECUTABLE /usr/local/lib/qtsdk-2010.02/qt/bin/qmake)
 endif(UNIX)
