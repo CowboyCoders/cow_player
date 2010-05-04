@@ -186,7 +186,6 @@ void main_window::stop_playback()
 void main_window::reset_session()
 {
     stop_playback();
-
     media_object_->clear();
 
     if (iodevice_) {
@@ -202,7 +201,9 @@ void main_window::reset_session()
 
 bool main_window::start_download(const libcow::program_info& program_info)
 {
-    reset_session();
+    if (media_object_->hasVideo()) {
+        reset_session();
+    }
 
     download_ctrl_ = client_->start_download(program_info);
     if (!download_ctrl_) {
