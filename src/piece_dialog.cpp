@@ -91,7 +91,7 @@ void piece_dialog::set_legend(const std::map<int, std::string>& devices)
         
         if ((*wit)->isWidgetType()) {
             QWidget* w = reinterpret_cast<QWidget*>(*wit);
-            ui->legend->layout()->removeWidget(w);
+            ui->legend->layout()->removeWidget(w); // Really needed?
             delete w;
         }
     }
