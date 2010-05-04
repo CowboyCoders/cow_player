@@ -60,20 +60,6 @@ void piece_dialog::set_download_control(libcow::download_control* control)
 
     // Register callback for piece finished event
     control->set_piece_finished_callback(boost::bind(&piece_dialog::piece_downloaded_callback,this,_1,_2));    
-
-#if 0
-    std::vector<int>* state = new std::vector<int>(control->num_pieces());
-
-    control->current_state(state, boost::bind(&piece_dialog::received_state,this,control,_1));
-
-    ui->pieceWidget->set_piece_states(*state);
-    ui->pieceWidget->set_colors(std::vector<QColor>(colors, colors + sizeof(colors)/sizeof(QColor)));
-    control->set_piece_finished_callback(boost::bind(&piece_dialog::piece_downloaded_callback,this,_1,_2));
-
-    delete state;
-
-    control->get_device_names(boost::bind(&piece_dialog::received_devices,this,_1));
-#endif
 }
 
 void piece_dialog::piece_downloaded_callback(int piece_idx, int device)
@@ -85,23 +71,18 @@ void piece_dialog::set_legend(const std::map<int, std::string>& devices)
 {
     assert(sizeof(colors)/sizeof(QColor) > 0);
 
-    const QObjectList& children = ui->legend->children(); //layout()->children();
-    QObjectList::const_iterator wit = children.begin();
-    for (; wit != children.end(); ++wit) {
-        
-        /*
-        if ((*wit)->isWidgetType()) {
-            QWidget* w = reinterpret_cast<QWidget*>(*wit);
-            ui->legend->layout()->removeWidget(w); // Really needed?
-            delete w;
-        }
-        */
+    std::vector<QWidget*>::iterator wit = legend_items_.begin();
+    for (; wit != legend_items_.end(); ++wit) {
+        delete *wit;
     }
+
+    legend_items_.clear();
 
     std::map<int, std::string>::const_iterator it = devices.begin();
     for (int i = 0; it != devices.end(); ++it, ++i) {
         int ind = i % (sizeof(colors)/sizeof(QColor));
         QFrame* item = create_legend_item(it->second, colors[ind]);
+        legend_items_.push_back(item);
         ui->legend->layout()->addWidget(item);
     }
 }

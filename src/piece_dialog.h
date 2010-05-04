@@ -34,6 +34,8 @@ private:
     
     Ui::piece_dialog *ui;
 
+    std::vector<QWidget*> legend_items_;
+
 signals:
     void piece_downloaded(int piece_idx, int device);
     

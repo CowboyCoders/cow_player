@@ -43,6 +43,9 @@ main_window::~main_window()
     BOOST_LOG_TRIVIAL(debug) << "main_window: in destructor";
     reset_session();
 
+    delete client_;
+    client_ = 0;
+
     delete audio_output_;
     delete media_object_;
     delete ui;
