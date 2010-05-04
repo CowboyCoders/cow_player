@@ -25,7 +25,6 @@ piece_dialog::piece_dialog(QWidget *parent) :
     ui->setupUi(this);
     connect(this,SIGNAL(piece_downloaded(int,int)),ui->pieceWidget,SLOT(piece_downloaded(int,int)));
     connect(this,SIGNAL(send_device_names(device_map)),this,SLOT(handle_device_names(device_map)));
-    //Q_DECLARE_METATYPE(piece_dialog::device_map);
     qRegisterMetaType<device_map>("device_map");
 }
 

@@ -53,7 +53,8 @@ qint64 cow_io_device::size() const
 bool cow_io_device::seek(qint64 pos)
 {
     BOOST_LOG_TRIVIAL(debug) << "seek() : offset " << pos;
-    if(pos > size_) {
+    BOOST_LOG_TRIVIAL(debug) << "file size: " << size_;
+    if(pos >= size_) {
         return false;
     } 
     
