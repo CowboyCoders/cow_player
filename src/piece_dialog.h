@@ -34,6 +34,8 @@ private:
     
     Ui::piece_dialog *ui;
 
+    libcow::download_control* control_;
+
     std::vector<QWidget*> legend_items_;
 
 signals:

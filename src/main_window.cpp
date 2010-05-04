@@ -75,7 +75,7 @@ void main_window::setup_actions()
     // Phonon events
     connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(media_stateChanged()));
     connect(media_object_, SIGNAL(finished ()), this, SLOT(media_finished()));
-    connect(media_object_, SIGNAL(tick(qint64)), this, SLOT(media_tick(qint64)));
+    //connect(media_object_, SIGNAL(tick(qint64)), this, SLOT(media_tick(qint64)));
     connect(ui->videoPlayer, SIGNAL(leaveFullscreen()), this, SLOT(leaveFullscreen_triggered()));
 
     // Signals concerning libcow

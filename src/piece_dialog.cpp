@@ -20,7 +20,8 @@ static QColor colors[] = {grey,forest_green,ruby_red,golden_yellow,turqoise};
 
 piece_dialog::piece_dialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::piece_dialog)
+    ui(new Ui::piece_dialog),
+    control_(0)
 {
     ui->setupUi(this);
     connect(this,SIGNAL(piece_downloaded(int,int)),ui->pieceWidget,SLOT(piece_downloaded(int,int)));
@@ -48,6 +49,13 @@ void piece_dialog::changeEvent(QEvent *e)
 
 void piece_dialog::set_download_control(libcow::download_control* control)
 {
+    if (control_) {
+        // Need to unset previously set callback
+        control_->unset_piece_finished_callback();
+    }
+
+    control_ = control;
+
     // Extract current pieces states from download control
     std::vector<int> state;
     control->get_current_state(state);

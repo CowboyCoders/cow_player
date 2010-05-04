@@ -132,7 +132,7 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
             // it is time to force another piece request
             if(!done && (iter % retry_delay == 0)) {
                 // forced request for critical window
-                //download_control_->set_playback_position(pos(), true);
+                download_control_->set_playback_position(pos(), true);
             }            
 
             BOOST_LOG_TRIVIAL(debug) << "read() MISSING DATA : pos " << pos() << " : maxlen " << maxlen << " waiting ...." << iter;
