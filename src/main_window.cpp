@@ -315,6 +315,11 @@ void main_window::changeEvent(QEvent *e)
 
 void main_window::closeEvent(QCloseEvent* e)
 {
+    piece_dialog_.hide();
+    settings_dialog_.hide();
+    select_program_dialog_.hide();
+    about_dialog_.hide();
+
 #ifdef WIN32
     if (iodevice_) {
         iodevice_->set_blocking(false);

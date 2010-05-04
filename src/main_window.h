@@ -63,19 +63,15 @@ private:
         stopped
     };
 
-    player_state get_player_state() const;
-    
-
+    player_state get_player_state() const;   
     
     std::vector<int> startup_pieces();
-
     
     Ui::main_window *ui;
 
     QSvgWidget* buffer_indicator_;
 
     cow_player::client_configuration config_;
-
 	
     piece_dialog piece_dialog_;
     select_program_dialog select_program_dialog_;
@@ -89,6 +85,7 @@ private:
     Phonon::MediaObject* media_object_;
     Phonon::AudioOutput* audio_output_;
     Phonon::MediaSource* media_source_;
+
     QAction *play_action_;
     QAction *pause_action_;
     QAction *stop_action_;
@@ -113,7 +110,6 @@ private slots:
     void leaveFullscreen_triggered();
     void play_action_triggered();
     void stop_action_triggered();
-
 
 signals:
     void startup_complete();
