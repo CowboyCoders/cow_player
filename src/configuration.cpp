@@ -39,7 +39,8 @@ void base_configuration::load(const std::string& fileName)
                 throw exceptions::load_config_error("Property element is missing type attribute.");
             }
 
-            std::string property_value(elem->GetText());
+            const char* text = elem->GetText();
+            std::string property_value(text ? text : "");
 
             property_map_[*property_name] = std::make_pair(*property_type, property_value);
         }

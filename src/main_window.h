@@ -44,8 +44,8 @@ private:
 
     void reset_session();
     
-    void on_startup_complete();
-    void on_request_complete(std::vector<int> pieces);
+    void on_startup_complete_callback();
+    void on_prefetch_complete_callback(std::vector<int> pieces);
     
     void set_fullscreen(bool fullscreen);
     void set_playback_buttons_disabled(bool state);
@@ -97,7 +97,9 @@ private:
     bool stopped_;
     
 private slots:
-    void start_io_device();
+    void prefetch_complete_triggered();
+    void startup_complete_triggered();
+
     void media_stateChanged();
     void on_actionShow_program_list_triggered();
     void on_actionPieces_triggered();
@@ -113,6 +115,7 @@ private slots:
 
 signals:
     void startup_complete();
+    void prefetch_complete();
     
 };
 
