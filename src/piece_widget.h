@@ -47,8 +47,6 @@ private:
     std::vector<QColor> colors_;
 
 protected:
-    bool event(QEvent* e);
-
     void resizeEvent(QResizeEvent* e);
     void paintEvent(QPaintEvent* e);
     void mouseMoveEvent(QMouseEvent* e);

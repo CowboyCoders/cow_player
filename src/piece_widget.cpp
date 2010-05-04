@@ -51,6 +51,7 @@ void piece_widget::set_piece_states(const std::vector<int>& piece_states)
 {
     piece_states_ = piece_states;
     refresh_scrollbar();
+    request_repaint();
 }
 
 void piece_widget::set_device_map(const std::map<int,std::string>& map)
@@ -61,6 +62,7 @@ void piece_widget::set_device_map(const std::map<int,std::string>& map)
 void piece_widget::set_colors(const std::vector<QColor>& colors)
 {
     colors_ = colors;
+    request_repaint();
 }
 
 void piece_widget::piece_downloaded(int piece_index, int device)
@@ -137,15 +139,6 @@ int piece_widget::piece_at(const QPoint& pos) const
     return piece < piece_states_.size() ? piece : -1;
 }
 
-bool piece_widget::event(QEvent* e)
-{
-     if (e->type() == QEvent::ToolTip) {
-         QHelpEvent* helpEvent = static_cast<QHelpEvent *>(e);
-     }
-
-     return QAbstractScrollArea::event(e);
-}
-
 void piece_widget::changeEvent(QEvent *e)
 {
     QAbstractScrollArea::changeEvent(e);
@@ -210,7 +203,7 @@ void piece_widget::mouseMoveEvent(QMouseEvent* e)
 
     if (piece != -1) {
         std::stringstream ss;
-        ss << piece << " : " << device_map_[piece];
+        ss << piece << " : " << device_map_[piece_states_[piece]];
         QToolTip::showText(e->globalPos(), QString(ss.str().c_str()), this);
     } else {
         QToolTip::hideText();
