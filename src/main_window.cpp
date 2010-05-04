@@ -1,13 +1,12 @@
 #include "main_window.h"
 #include "ui_main_window.h"
 
-
 #include <boost/shared_ptr.hpp>
 #include <boost/log/trivial.hpp>
 
 #include <QFile>
 #include <QDir>
-#include <qthread.h>
+#include <QThread>
 #include <QToolBar>
 #include <QIcon>
 
@@ -50,13 +49,17 @@ main_window::~main_window()
 
 void main_window::setup_actions()
 {
+    // Playback buttons
     connect(play_action_,SIGNAL(triggered()),this,SLOT(play_action_triggered()));
-    //connect(pause_action_,SIGNAL(triggered()),this,SLOT(pause_action_triggered()));
     connect(stop_action_,SIGNAL(triggered()),this,SLOT(stop_action_triggered()));
     
+    // Phonon events
     connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(media_stateChanged()));
     connect(ui->videoPlayer, SIGNAL(leaveFullscreen()), this, SLOT(leaveFullscreen_triggered()));
-    connect(this,SIGNAL(startup_complete()),this,SLOT(start_io_device()));
+
+    // Signals concerning libcow
+    connect(this,SIGNAL(prefetch_complete()),this,SLOT(prefetch_complete_triggered()));
+    connect(this,SIGNAL(startup_complete()),this,SLOT(startup_complete_triggered()));
 }
 
 void main_window::setup_ui()
@@ -184,14 +187,45 @@ bool main_window::start_download(const libcow::program_info& program_info)
         return false;
     }
     
-    download_ctrl_->invoke_after_init(boost::bind(&main_window::on_startup_complete,this));
+    download_ctrl_->invoke_after_init(boost::bind(&main_window::on_startup_complete_callback, this));
+
+    // Pre-buffer
+    std::vector<int> prefetch_pieces = startup_pieces();
+    download_ctrl_->pre_buffer(prefetch_pieces);
+
+    // Register a callback for when the pre-buffering is completed
+    download_ctrl_->invoke_when_downloaded(prefetch_pieces, boost::bind(&main_window::on_prefetch_complete_callback,this,_1));
     
     statusBar()->showMessage("Loading...");
 
     return true;
 }
 
-void main_window::start_io_device()
+std::vector<int> main_window::startup_pieces()
+{
+    std::vector<int> pieces;
+    for(int i = 0; i < 5; ++i)
+        pieces.push_back(i);
+    pieces.push_back(download_ctrl_->num_pieces()-1);
+    return pieces;
+}
+
+void main_window::on_startup_complete_callback()
+{
+    emit startup_complete(); 
+}
+
+void main_window::on_prefetch_complete_callback(std::vector<int> pieces)
+{
+    emit prefetch_complete(); 
+}
+
+void main_window::startup_complete_tiggered()
+{
+    piece_dialog_.set_download_control(download_ctrl_); // set here, since by now disk pieces will be read
+}
+
+void main_window::prefetch_complete_triggered()
 {
     assert(!iodevice_);
     assert(!media_source_);
@@ -321,27 +355,6 @@ void main_window::update_play_pause_button()
         play_action_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
         play_action_->setIconText(tr("Play"));
     }
-}
-
-void main_window::on_request_complete(std::vector<int> pieces)
-{
-    emit startup_complete(); 
-}
-
-std::vector<int> main_window::startup_pieces()
-{
-    std::vector<int> pieces;
-    for(int i = 0; i < 5; ++i)
-        pieces.push_back(i);
-    pieces.push_back(download_ctrl_->num_pieces()-1);
-    return pieces;
-}
-
-void main_window::on_startup_complete()
-{
-    piece_dialog_.set_download_control(download_ctrl_); // set here, since by now disk pieces will be read
-    download_ctrl_->pre_buffer(startup_pieces());
-    download_ctrl_->invoke_when_downloaded(startup_pieces(),boost::bind(&main_window::on_request_complete,this,_1));
 }
 
 void main_window::on_actionPieces_triggered()

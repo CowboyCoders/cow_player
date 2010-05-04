@@ -23,7 +23,7 @@ protected:
     void changeEvent(QEvent *e);
 
 private:
-    void set_legend(const std::vector<std::string>& labels);
+    void set_legend(const std::map<int, std::string>& devices);
     QFrame* create_legend_item(const std::string& label, const QColor& color);
 
     void piece_downloaded_callback(int piece_idx, int device);
@@ -36,10 +36,10 @@ private:
 
 private slots:
     void handle_device_names(device_map devices);
+    void startup_complete();
 
 signals:
     void piece_downloaded(int piece_idx, int device);
-    void send_device_names(device_map devices);
     
 };
 

@@ -24,7 +24,6 @@ piece_dialog::piece_dialog(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(this,SIGNAL(piece_downloaded(int,int)),ui->pieceWidget,SLOT(piece_downloaded(int,int)));
-    connect(this,SIGNAL(send_device_names(device_map)),this,SLOT(handle_device_names(device_map)));
     //Q_DECLARE_METATYPE(piece_dialog::device_map);
     qRegisterMetaType<device_map>("device_map");
 }
@@ -48,42 +47,42 @@ void piece_dialog::changeEvent(QEvent *e)
 
 void piece_dialog::set_download_control(libcow::download_control* control)
 {
-    std::vector<int>* state = new std::vector<int>(control->num_pieces());
-    control->current_state(state, boost::bind(&piece_dialog::received_state,this,control,_1));
-}
+    // Extract current pieces states from download control
+    std::vector<int> state;
+    control->get_current_state(state);
 
-void piece_dialog::received_state(libcow::download_control* control, std::vector<int>* state)
-{
+    std::map<int, std::string> devices = control->get_device_names();
+
+    set_legend(devices);
+
+    ui->pieceWidget->set_piece_states(state);
+    ui->pieceWidget->set_device_map(devices);
+    ui->pieceWidget->set_colors(std::vector<QColor>(colors, colors + sizeof(colors)/sizeof(QColor)));
+
+    // Register callback for piece finished event
+    control->set_piece_finished_callback(boost::bind(&piece_dialog::piece_downloaded_callback,this,_1,_2));    
+
+#if 0
+    std::vector<int>* state = new std::vector<int>(control->num_pieces());
+
+    control->current_state(state, boost::bind(&piece_dialog::received_state,this,control,_1));
+
     ui->pieceWidget->set_piece_states(*state);
     ui->pieceWidget->set_colors(std::vector<QColor>(colors, colors + sizeof(colors)/sizeof(QColor)));
     control->set_piece_finished_callback(boost::bind(&piece_dialog::piece_downloaded_callback,this,_1,_2));
-    delete state;
-    control->get_device_names(boost::bind(&piece_dialog::received_devices,this,_1));
-}
 
-void piece_dialog::received_devices(std::map<int,std::string> devices)
-{
-    ui->pieceWidget->set_device_map(devices);
-    emit send_device_names(devices); 
-}
-    
-void piece_dialog::handle_device_names(device_map devices)
-{
-    std::vector<std::string> labels;
-    std::map<int,std::string>::iterator it;
-    for(it = devices.begin(); it != devices.end(); ++it) {
-        std::pair<int,std::string> ele = *it;
-        labels.push_back(ele.second);
-    }
-    set_legend(labels);
+    delete state;
+
+    control->get_device_names(boost::bind(&piece_dialog::received_devices,this,_1));
+#endif
 }
 
 void piece_dialog::piece_downloaded_callback(int piece_idx, int device)
 {
-    emit piece_downloaded(piece_idx,device);
+    emit piece_downloaded(piece_idx, device);
 }
 
-void piece_dialog::set_legend(const std::vector<std::string>& labels) 
+void piece_dialog::set_legend(const std::map<int, std::string>& devices) 
 {
     assert(sizeof(colors)/sizeof(QColor) > 0);
 
@@ -98,10 +97,10 @@ void piece_dialog::set_legend(const std::vector<std::string>& labels)
         }
     }
 
-    std::vector<std::string>::const_iterator it = labels.begin();
-    for (int i = 0; it != labels.end(); ++it, ++i) {
+    std::map<int, std::string>::const_iterator it = devices.begin();
+    for (int i = 0; it != devices.end(); ++it, ++i) {
         int ind = i % (sizeof(colors)/sizeof(QColor));
-        QFrame* item = create_legend_item(*it, colors[ind]);
+        QFrame* item = create_legend_item(it->second, colors[ind]);
         ui->legend->layout()->addWidget(item);
     }
 }
@@ -123,7 +122,6 @@ QFrame* piece_dialog::create_legend_item(const std::string& label, const QColor&
     color_box->setAutoFillBackground(true);
 
     QPalette palette = color_box->palette();
-    //palette.setColor(foregroundRole(), color);
     palette.setColor(backgroundRole(), color);    
     color_box->setPalette(palette);
 
@@ -133,11 +131,6 @@ QFrame* piece_dialog::create_legend_item(const std::string& label, const QColor&
     item_lbl->setText(QString::fromAscii(label.c_str()));
 
     horizontalLayout->addWidget(item_lbl);
-
-    /*
-    horizontalSpacer_3 = new QSpacerItem(10, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
-    horizontalLayout->addItem(horizontalSpacer_3);
-    */
 
     return frame;
 }
