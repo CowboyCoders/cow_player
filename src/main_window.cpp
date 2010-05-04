@@ -12,6 +12,21 @@
 
 const std::string config_filename = "cow_player_config.xml";
 
+std::string time2str(qint64 time)
+{
+    int hours = time / (1000*60*60);
+    time -= hours * 1000*60*60;
+    int minutes = time  / (1000*60);
+    time -= minutes * 1000*60;
+    int seconds = time  / 1000;
+
+    std::stringstream ss;
+    ss << std::setw(2) << std::setfill('0') << hours << ":" 
+       << std::setw(2) << std::setfill('0') << minutes << ":" 
+       << std::setw(2) << std::setfill('0') << seconds;
+    return ss.str();
+}
+
 main_window::main_window(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::main_window),
@@ -59,6 +74,8 @@ void main_window::setup_actions()
     
     // Phonon events
     connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(media_stateChanged()));
+    connect(media_object_, SIGNAL(finished ()), this, SLOT(media_finished()));
+    connect(media_object_, SIGNAL(tick(qint64)), this, SLOT(media_tick(qint64)));
     connect(ui->videoPlayer, SIGNAL(leaveFullscreen()), this, SLOT(leaveFullscreen_triggered()));
 
     // Signals concerning libcow
@@ -412,6 +429,12 @@ void main_window::media_stateChanged()
     update_play_pause_button();
 }
 
+void main_window::media_finished()
+{
+    // Stop also causes seekbar to be positoned at the beginning
+    stop_playback();
+}
+
 void main_window::play_action_triggered()
 {
     switch (get_player_state()) {
@@ -430,20 +453,7 @@ void main_window::stop_action_triggered()
     stop_playback();
 }
 
-std::string time2str(qint64 time)
-{
-    int hours = time / (1000*60*60);
-    time -= hours * 1000*60*60;
-    int minutes = time  / (1000*60);
-    time -= minutes * 1000*60;
-    int seconds = time  / 1000;
-
-    std::stringstream ss;
-    ss << std::setw(2) << hours << ":" << minutes << ":" << seconds;
-    return ss.str();
-}
-
-void main_window::tick(qint64 time)
+void main_window::media_tick(qint64 time)
 {
     if (media_object_->state() == Phonon::PlayingState) {
         std::stringstream ss;

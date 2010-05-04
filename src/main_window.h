@@ -101,6 +101,9 @@ private slots:
     void startup_complete_triggered();
 
     void media_stateChanged();
+    void media_finished();
+    void media_tick(qint64 time);
+
     void on_actionShow_program_list_triggered();
     void on_actionPieces_triggered();
     void on_actionFullscreen_triggered();
@@ -111,7 +114,6 @@ private slots:
     void play_action_triggered();
     void stop_action_triggered();
 
-    void tick(qint64 time);
 
 signals:
     void startup_complete();
