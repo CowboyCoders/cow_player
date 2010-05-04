@@ -187,7 +187,9 @@ void main_window::reset_session()
 {
     stop_playback();
 
+#ifdef WIN32
     media_object_->clear();
+#endif
 
     if (iodevice_) {
         delete iodevice_;
@@ -203,12 +205,19 @@ void main_window::reset_session()
 bool main_window::start_download(const libcow::program_info& program_info)
 {
     reset_session();
+    
 
     download_ctrl_ = client_->start_download(program_info);
     if (!download_ctrl_) {
         BOOST_LOG_TRIVIAL(error) << "cow_player: Could not play program.";
         return false;
     }
+    
+    int window = config_.get_critical_window();
+    download_ctrl_->set_critical_window(window);
+    
+    int timeout = config_.get_critical_window_timeout();
+    download_ctrl_->set_critical_window_timeout(timeout);
     
     download_ctrl_->invoke_after_init(boost::bind(&main_window::on_startup_complete_callback, this));
 
