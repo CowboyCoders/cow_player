@@ -106,6 +106,7 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
 
         int recheck_count = 1;
         int retry_delay = 10; 
+        int max = 100;
         while (true) {
             if(check_for_shutdown()) {
                 BOOST_LOG_TRIVIAL(debug) << "cow_io_device:readData: shutting down";
@@ -124,6 +125,10 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
                 download_control_->set_playback_position(pos(), true);
             }
             
+            if(recheck_count >= max) {
+                BOOST_LOG_TRIVIAL(warning) << "linux_io_device: couldn't get any data!";
+                return -1;
+            }
             ++recheck_count;
         }
 

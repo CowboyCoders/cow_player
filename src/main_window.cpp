@@ -41,6 +41,7 @@ main_window::main_window(QWidget *parent) :
 
 main_window::~main_window()
 {
+    BOOST_LOG_TRIVIAL(debug) << "main_window: in destructor";
     reset_session();
 
     delete audio_output_;
@@ -130,12 +131,12 @@ void main_window::init_client()
     client_->register_download_device_factory(
         boost::shared_ptr<libcow::download_device_factory>(
             new libcow::on_demand_server_connection_factory()), 
-        "http");
+        "HTTP");
     
     client_->register_download_device_factory(
         boost::shared_ptr<libcow::download_device_factory>(
             new libcow::multicast_server_connection_factory()),
-        "multicast");
+        "Multicast");
 }
     
 void main_window::on_actionAbout_triggered()
