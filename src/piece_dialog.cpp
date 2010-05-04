@@ -29,6 +29,8 @@ piece_dialog::piece_dialog(QWidget *parent) :
 
 piece_dialog::~piece_dialog()
 {
+
+
     delete ui;
 }
 

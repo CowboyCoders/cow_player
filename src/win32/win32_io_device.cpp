@@ -99,6 +99,8 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
 
         media_object_->pause();
 
+        const int retry_delay = 20; 
+
         int iter = 1;
         bool done = false;
         while (!done) {
@@ -121,10 +123,22 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
                 }
             }
 
+            // Zzzz....
             libcow::system::sleep(50);
+
             done = download_control_->has_data(pos(), maxlen);
 
-            BOOST_LOG_TRIVIAL(debug) << "read() MISSING DATA : pos " << pos() << " : maxlen " << maxlen << " waiting ...." << iter++;
+            // If we still aren't done and haven't been so for quite some time
+            // it is time to force another piece request
+            if(!done && (iter % retry_delay == 0)) {
+                // forced request for critical window
+                download_control_->set_playback_position(pos(), true);
+            }
+            
+            // Increment iterator counter
+            ++iter;
+
+            BOOST_LOG_TRIVIAL(debug) << "read() MISSING DATA : pos " << pos() << " : maxlen " << maxlen << " waiting ...." << iter;
         }
 
         {   // Update buffering flag
