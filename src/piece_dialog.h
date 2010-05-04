@@ -14,6 +14,7 @@ namespace Ui {
 class piece_dialog : public QDialog {
     Q_OBJECT
 public:
+    typedef std::map<int,std::string> device_map; 
     piece_dialog(QWidget *parent = 0);
     ~piece_dialog();
     void set_download_control(libcow::download_control* control);
@@ -33,8 +34,12 @@ private:
     
     Ui::piece_dialog *ui;
 
+private slots:
+    void handle_device_names(device_map devices);
+
 signals:
     void piece_downloaded(int piece_idx, int device);
+    void send_device_names(device_map devices);
     
 };
 

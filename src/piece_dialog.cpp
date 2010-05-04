@@ -2,6 +2,7 @@
 #include "ui_piece_dialog.h"
 #include <cow/cow.hpp>
 
+#include <QMetaType>
 #include <QColor>
 #include <QLabel>
 #include <boost/bind.hpp>
@@ -23,16 +24,9 @@ piece_dialog::piece_dialog(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(this,SIGNAL(piece_downloaded(int,int)),ui->pieceWidget,SLOT(piece_downloaded(int,int)));
-
-    std::vector<std::string> labels;
-    labels.push_back("Missing");
-    labels.push_back("Test");
-    labels.push_back("Test");
-    labels.push_back("Woooo");
-    labels.push_back("SOmetHiung");
-    labels.push_back("JDI82GH");
-    set_legend(labels);
-
+    connect(this,SIGNAL(send_device_names(device_map)),this,SLOT(handle_device_names(device_map)));
+    //Q_DECLARE_METATYPE(piece_dialog::device_map);
+    qRegisterMetaType<device_map>("device_map");
 }
 
 piece_dialog::~piece_dialog()
@@ -70,13 +64,17 @@ void piece_dialog::received_state(libcow::download_control* control, std::vector
 void piece_dialog::received_devices(std::map<int,std::string> devices)
 {
     ui->pieceWidget->set_device_map(devices);
+    emit send_device_names(devices); 
+}
     
+void piece_dialog::handle_device_names(device_map devices)
+{
     std::vector<std::string> labels;
-    labels.push_back("Missing");
-    labels.push_back("Test");
-    labels.push_back("Woooo");
-    labels.push_back("SOmetHiung");
-    labels.push_back("JDI82GH");
+    std::map<int,std::string>::iterator it;
+    for(it = devices.begin(); it != devices.end(); ++it) {
+        std::pair<int,std::string> ele = *it;
+        labels.push_back(ele.second);
+    }
     set_legend(labels);
 }
 
