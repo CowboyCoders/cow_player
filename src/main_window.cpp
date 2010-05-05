@@ -89,6 +89,7 @@ void main_window::setup_ui()
 
     // Create Phonon objects
     media_object_ = new Phonon::MediaObject(this);
+    media_object_->setTickInterval(500);
     audio_output_ = new Phonon::AudioOutput(Phonon::VideoCategory, this);    
   
     // Connect phonon video output
@@ -106,7 +107,11 @@ void main_window::setup_ui()
     ui->actionFullscreen->setChecked(fullscreen_mode_);
     
     // Connect UI gauges
+#ifdef WIN32
+    ui->seekSlider->setTracking(true);
+#else
     ui->seekSlider->setTracking(false);
+#endif
     ui->seekSlider->setMediaObject(media_object_);
     ui->volumeSlider->setAudioOutput(audio_output_);
 }
