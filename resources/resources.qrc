@@ -1,0 +1,19 @@
+ <!DOCTYPE RCC>
+ <RCC version="1.0">
+ <qresource>
+     <file>pause_disabled.png</file>
+     <file>pause_hot.png</file>
+     <file>pause_normal.png</file>
+     <file>pause_pressed.png</file>
+
+     <file>play_disabled.png</file>
+     <file>play_hot.png</file>
+     <file>play_normal.png</file>
+     <file>play_pressed.png</file>
+
+     <file>stop_disabled.png</file>
+     <file>stop_hot.png</file>
+     <file>stop_normal.png</file>
+     <file>stop_pressed.png</file>
+ </qresource>
+ </RCC>

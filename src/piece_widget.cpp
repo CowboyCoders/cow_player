@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QToolTip>
 #include <QMouseEvent>
+
 #include <sstream>
 #include <algorithm>
 #include <cassert>

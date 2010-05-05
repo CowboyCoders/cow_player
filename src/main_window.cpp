@@ -69,8 +69,8 @@ main_window::~main_window()
 void main_window::setup_actions()
 {
     // Playback buttons
-    connect(play_action_,SIGNAL(triggered()),this,SLOT(play_action_triggered()));
-    connect(stop_action_,SIGNAL(triggered()),this,SLOT(stop_action_triggered()));
+    connect(play_action_,SIGNAL(clicked()),this,SLOT(play_action_triggered()));
+    connect(stop_action_,SIGNAL(clicked()),this,SLOT(stop_action_triggered()));
     
     // Phonon events
     connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(media_stateChanged()));
@@ -99,7 +99,7 @@ void main_window::setup_ui()
     setup_playback_buttons();
     
     // Set window icon
-    QIcon icon("player_icon.png");
+    QIcon icon(":/player_icon.png");
     setWindowIcon(icon);
         
     // Make sure the fullscreen mode menu is checked correctly
@@ -112,19 +112,33 @@ void main_window::setup_ui()
 }
 
 void main_window::setup_playback_buttons()
-{    
-    play_action_ = new QAction(this);
-    stop_action_ = new QAction(style()->standardIcon(QStyle::SP_MediaStop), tr("Stop"), this);
+{   
+    play_icons_ = player_button::icon_set(QIcon(tr(":/play_normal.png")),
+                                          QIcon(tr(":/play_hot.png")),
+                                          QIcon(tr(":/play_pressed.png")),
+                                          QIcon(tr(":/play_disabled.png")));
 
-    QToolBar *bar = new QToolBar;
-    bar->addAction(play_action_);
-    bar->addSeparator();
-    bar->addAction(stop_action_);
+    pause_icons_ = player_button::icon_set(QIcon(tr(":/pause_normal.png")),
+                                           QIcon(tr(":/pause_hot.png")),
+                                           QIcon(tr(":/pause_pressed.png")),
+                                           QIcon(tr(":/pause_disabled.png")));
+
+    stop_icons_ = player_button::icon_set(QIcon(tr(":/stop_normal.png")),
+                                          QIcon(tr(":/stop_hot.png")),
+                                          QIcon(tr(":/stop_pressed.png")),
+                                          QIcon(tr(":/stop_disabled.png")));
+
+    play_action_ = new player_button(play_icons_, this);
+    play_action_->setIconSize(QSize(35,35));
+
+    stop_action_ = new player_button(stop_icons_, this);
+    stop_action_->setIconSize(QSize(35,35));
+
+    ui->playbackLayout->addWidget(play_action_);
+    ui->playbackLayout->addWidget(stop_action_);
 
     update_play_pause_button();    
     set_playback_buttons_disabled(true);
-
-    ui->playbackLayout->addWidget(bar);
 }  
 
 void main_window::load_config_file()
@@ -393,11 +407,9 @@ void main_window::set_playback_buttons_disabled(bool state)
 void main_window::update_play_pause_button()
 {
     if (get_player_state() == main_window::playing) {
-        play_action_->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-        play_action_->setIconText(tr("Pause"));
+        play_action_->set_icon_set(pause_icons_);
     } else {
-        play_action_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-        play_action_->setIconText(tr("Play"));
+        play_action_->set_icon_set(play_icons_);
     }
 }
 
