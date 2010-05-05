@@ -148,7 +148,6 @@ void main_window::load_config_file()
 void main_window::init_client()
 {
     client_ = new libcow::cow_client;
-    client_->set_download_directory(config_.get_download_dir()); 
     client_->set_bittorrent_port(config_.get_bittorrent_port());
 
     client_->register_download_device_factory(
@@ -214,6 +213,7 @@ bool main_window::start_download(const libcow::program_info& program_info)
         reset_session();
     }
 
+    client_->set_download_directory(config_.get_download_dir()); 
     download_ctrl_ = client_->start_download(program_info);
     if (!download_ctrl_) {
         BOOST_LOG_TRIVIAL(error) << "cow_player: Could not play program.";
