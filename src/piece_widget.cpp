@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QToolTip>
 #include <QMouseEvent>
+
 #include <sstream>
 #include <algorithm>
 #include <cassert>
@@ -129,7 +130,7 @@ int piece_widget::piece_at(const QPoint& pos) const
 
     // Number of rows
     int nrows = std::min<int>((piece_states_.size() - piece_index) / ncols + 2,
-                              viewport()->height() / item_size + 2);
+                               viewport()->height() / item_size + 2);
 
     int corrected_x = (std::max)(pos.x() - 1, 0);
     int corrected_y = (std::max)(pos.y() + offset - 1, 0);
@@ -184,7 +185,7 @@ void piece_widget::paintEvent(QPaintEvent* e)
 
     // Number of rows
     int nrows = std::min<int>((piece_states_.size() - piece_index) / ncols + 2,
-                              viewport()->height() / item_size + 2);
+                                viewport()->height() / item_size + 2);
 
     for (int r = 0; r < nrows; r++) {
         for (int c = 0; c < ncols && piece_index < piece_states_.size(); c++) {

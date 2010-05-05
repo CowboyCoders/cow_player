@@ -138,6 +138,7 @@ set(cow_player_MOCS
     ${COW_PLAYER_SOURCE_DIR}/src/select_program_dialog.h
     ${COW_PLAYER_SOURCE_DIR}/src/settings_dialog.h
     ${COW_PLAYER_SOURCE_DIR}/src/about_dialog.h
+    ${COW_PLAYER_SOURCE_DIR}/src/player_button.h    
 )
 
 SET(cow_player_UIS
@@ -149,13 +150,17 @@ SET(cow_player_UIS
     ${COW_PLAYER_SOURCE_DIR}/src/about_dialog.ui
 )
 
+SET(cow_player_RCCS resources/resources.qrc)
+
+# generate rules for building source files from the resources
+QT4_ADD_RESOURCES(cow_player_SRCS ${cow_player_RCCS})
 # build ui_XXX files from the XML-style .ui files
 QT4_WRAP_UI(cow_player_SRCS ${cow_player_UIS})
 # this moc's the above variable and appends to the cxx sources
 QT4_WRAP_CPP(cow_player_SRCS ${cow_player_MOCS})
 
 # uses /SUBSYSTEM:WINDOWS in msvc
-add_executable(cow_player WIN32 ${cow_player_SRCS} ${cow_player_INCLUDES} ${cow_player_MOCS})
+add_executable(cow_player WIN32 ${cow_player_SRCS} ${cow_player_INCLUDES})
 
 IF(WIN32)
     # Set exception handling model

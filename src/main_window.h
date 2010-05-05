@@ -7,11 +7,11 @@
 #include "client_configuration.h"
 #include "cow_io_device.h"
 #include "about_dialog.h"
+#include "player_button.h"
 
 #include <QAction>
 #include <QtGui/QMainWindow>
 #include <QCloseEvent>
-#include <QSvgWidget>
 
 /* phonon with a capital "P" breaks ubuntu make */
 #include <phonon>
@@ -69,8 +69,6 @@ private:
     
     Ui::main_window *ui;
 
-    QSvgWidget* buffer_indicator_;
-
     cow_player::client_configuration config_;
 	
     piece_dialog piece_dialog_;
@@ -86,9 +84,12 @@ private:
     Phonon::AudioOutput* audio_output_;
     Phonon::MediaSource* media_source_;
 
-    QAction *play_action_;
-    QAction *pause_action_;
-    QAction *stop_action_;
+    player_button::icon_set play_icons_;
+    player_button::icon_set pause_icons_;
+    player_button::icon_set stop_icons_;
+
+    player_button* play_action_;
+    player_button* stop_action_;
 
     bool fullscreen_mode_;
     bool stopped_;
