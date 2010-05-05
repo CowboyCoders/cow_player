@@ -160,7 +160,7 @@ QT4_WRAP_UI(cow_player_SRCS ${cow_player_UIS})
 QT4_WRAP_CPP(cow_player_SRCS ${cow_player_MOCS})
 
 # uses /SUBSYSTEM:WINDOWS in msvc
-add_executable(cow_player WIN32 ${cow_player_SRCS} ${cow_player_INCLUDES})
+add_executable(cow_player WIN32 ${cow_player_SRCS} ${cow_player_INCLUDES} ${cow_player_MOCS})
 
 IF(WIN32)
     # Set exception handling model
