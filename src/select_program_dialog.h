@@ -71,6 +71,7 @@ private:
     void download_list(std::string url, size_t timeout);
     void show_list();
     void show_msg(QString msg);
+
     Ui::select_program_dialog *ui;
 
     libcow::program_table prog_table_;
@@ -82,15 +83,13 @@ private:
     bool is_populated_;
     bool connected_;
 
-    libcow::dispatcher disp_;
-
 private slots:
     void on_buttonBox_accepted();
-    void handle_download_completed(bool result);
+    void handle_download_completed(bool result, libcow::program_table* program_table);
     void current_item_changed();
 
 signals:
-    void download_completed(bool result);
+    void download_completed(bool result, libcow::program_table* program_table);
 };
 
 #endif // SELECT_PROGRAM_DIALOG_H

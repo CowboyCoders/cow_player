@@ -13,13 +13,14 @@ select_program_dialog::select_program_dialog(QWidget *parent) :
     ui(new Ui::select_program_dialog),
     selected_program_index_(-1),
     is_populated_(false),
-    connected_(false),
-    disp_(0)
+    connected_(false)
 {
     ui->setupUi(this);
+    
     QPushButton* ok_button = ui->buttonBox->button(QDialogButtonBox::Ok);
     ok_button->setDisabled(true);
-    connect(this,SIGNAL(download_completed(bool)),this,SLOT(handle_download_completed(bool)));
+
+    connect(this,SIGNAL(download_completed(bool,libcow::program_table*)),this,SLOT(handle_download_completed(bool,libcow::program_table*)));
     connect(ui->program_list_,SIGNAL(itemSelectionChanged()),this,SLOT(current_item_changed()));
 }
 
@@ -65,8 +66,13 @@ void select_program_dialog::show_list()
     is_populated_ = true;
 }
 
-void select_program_dialog::handle_download_completed(bool res)
+void select_program_dialog::handle_download_completed(bool res, libcow::program_table* pt)
 {
+    assert(pt);
+
+    prog_table_ = *pt;
+    delete pt;
+
     if(res) {
         connected_ = true;
         show_list();
@@ -78,14 +84,22 @@ void select_program_dialog::handle_download_completed(bool res)
 
 void select_program_dialog::download_list(std::string url, size_t timeout)
 {
-    bool res = prog_table_.load_from_http(url,timeout);
-    emit download_completed(res);
+    libcow::program_table* prog_table = new libcow::program_table;
+    bool result = false;
+    try {
+        prog_table->load_from_http(url,timeout);
+        result = true;
+    } catch (libcow::exception&) {
+        // Do nothing
+    }
+
+    emit download_completed(result, prog_table);
 }
 
 void select_program_dialog::populate_list(size_t timeout) 
 {
     show_msg("Connecting to server");
-    disp_.post<boost::function<void()> >(boost::bind(&select_program_dialog::download_list,this,program_table_url_,timeout));
+    boost::thread(boost::bind(&select_program_dialog::download_list,this,program_table_url_,timeout));
 }
 
 void select_program_dialog::on_buttonBox_accepted()

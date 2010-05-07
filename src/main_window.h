@@ -41,6 +41,7 @@ private:
         stopped
     };
 
+
     void setup_actions();
     void setup_ui();
     void setup_playback_buttons();
@@ -92,6 +93,8 @@ private:
     bool stopped_;
     
 private slots:
+    void error_message(const QString& msg);
+
     void set_fullscreen(bool fullscreen);
     void toggle_fullscreen();
     void leave_fullscreen();
@@ -113,6 +116,7 @@ private slots:
     void stop_action_triggered();
 
 signals:
+    void signal_error_message(const QString& msg);
     void startup_complete();
     void prefetch_complete();
     

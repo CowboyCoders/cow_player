@@ -9,6 +9,7 @@
 #include <QThread>
 #include <QToolBar>
 #include <QIcon>
+#include <QMessageBox>
 
 const std::string config_filename = "cow_player_config.xml";
 
@@ -66,8 +67,18 @@ main_window::~main_window()
     delete ui;
 }
 
+void main_window::error_message(const QString& msg) 
+{
+    QMessageBox msgBox;
+    msgBox.setText(msg);
+    msgBox.exec();
+}
+
 void main_window::setup_actions()
 {
+    // Thread safe error messages
+    connect(this,SIGNAL(signal_error_message(const QString&)),this,SLOT(error_message(const QString&)));
+
     // Playback buttons
     connect(play_action_,SIGNAL(clicked()),this,SLOT(play_action_triggered()));
     connect(stop_action_,SIGNAL(clicked()),this,SLOT(stop_action_triggered()));
@@ -193,9 +204,16 @@ void main_window::stop_playback()
 {
 #ifdef WIN32
     if (iodevice_) {
+
+        media_object_->pause();
+        media_object_->seek(0);
+
+
+        /*
         iodevice_->set_blocking(false);
         media_object_->stop();
         iodevice_->set_blocking(true);
+        */
         stopped_ = true;
     }
 #else
@@ -232,34 +250,35 @@ void main_window::reset_session()
 
 bool main_window::start_download(const libcow::program_info& program_info)
 {
-    if (media_object_->hasVideo()) {
-        reset_session();
-    }
+    try {
+        // Propagate config changes
+        client_->set_download_directory(config_.get_download_dir()); 
 
-    client_->set_download_directory(config_.get_download_dir()); 
-    download_ctrl_ = client_->start_download(program_info);
-    if (!download_ctrl_) {
-        BOOST_LOG_TRIVIAL(error) << "cow_player: Could not play program.";
+        download_ctrl_ = client_->start_download(program_info, 3);
+        download_ctrl_->invoke_after_init(boost::bind(&main_window::on_startup_complete_callback, this));
+       
+        int window = config_.get_critical_window();
+        download_ctrl_->set_critical_window(window);
+        
+        int timeout = config_.get_critical_window_timeout();
+        download_ctrl_->set_critical_window_timeout(timeout);        
+
+        // Pre-buffer
+        download_ctrl_->pre_buffer(startup_pieces(), 
+            boost::bind(&main_window::on_prefetch_complete_callback,this,_1));
+
+    } catch (libcow::exception& e) {
+
+        //statusBar()->showMessage("Error occured when starting program");
+
+        BOOST_LOG_TRIVIAL(error) << "cow_player: could not start program: " << e.what();
+
+        std::stringstream ss;
+        ss << "Could not start the program: " << e.what();
+        emit signal_error_message(QString::fromAscii(ss.str().c_str()));
+
         return false;
     }
-   
-    set_playback_buttons_disabled(true);
-    int window = config_.get_critical_window();
-    download_ctrl_->set_critical_window(window);
-    
-    int timeout = config_.get_critical_window_timeout();
-    download_ctrl_->set_critical_window_timeout(timeout);
-    
-    download_ctrl_->invoke_after_init(boost::bind(&main_window::on_startup_complete_callback, this));
-
-    // Pre-buffer
-    std::vector<int> prefetch_pieces = startup_pieces();
-    download_ctrl_->pre_buffer(prefetch_pieces);
-
-    // Register a callback for when the pre-buffering is completed
-    download_ctrl_->invoke_when_downloaded(prefetch_pieces, boost::bind(&main_window::on_prefetch_complete_callback,this,_1));
-    
-    statusBar()->showMessage("Loading...");
 
     return true;
 }
@@ -350,7 +369,6 @@ void main_window::leave_fullscreen()
     set_fullscreen(false);
 }
 
-
 void main_window::changeEvent(QEvent *e)
 {
     QMainWindow::changeEvent(e);
@@ -410,9 +428,18 @@ void main_window::on_actionShow_program_list_triggered()
     select_program_dialog_.show();
     
     if(select_program_dialog_.exec() == QDialog::Accepted) {
+
         const libcow::program_info* program = select_program_dialog_.selected_program();
         if(program) {
-            start_download(*program);
+
+            if (media_object_->hasVideo()) {
+                reset_session();
+            }
+
+            set_playback_buttons_disabled(true);
+            statusBar()->showMessage("Loading...");
+
+            boost::thread(boost::bind(&main_window::start_download, this, *program));
         } else {
             BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: got bad program_info pointer from select_program_dialog";
         }
@@ -453,8 +480,12 @@ void main_window::media_stateChanged()
             statusBar()->showMessage("Loading...");
             break;
         case Phonon::PlayingState:
-            statusBar()->showMessage("Playing");
-            stopped_ = false;
+            if (stopped_) {
+                media_object_->pause();
+            } else {
+                statusBar()->showMessage("Playing");
+                //stopped_ = false;
+            }
             break;
         case Phonon::PausedState:
             if(!stopped_) {
@@ -492,6 +523,7 @@ void main_window::play_action_triggered()
         break;
     case main_window::stopped:
     case main_window::paused:
+        stopped_ = false;
         media_object_->play();
         break;
     }
