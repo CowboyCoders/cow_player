@@ -76,7 +76,10 @@ void main_window::setup_actions()
     connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(media_stateChanged()));
     connect(media_object_, SIGNAL(finished ()), this, SLOT(media_finished()));
     connect(media_object_, SIGNAL(tick(qint64)), this, SLOT(media_tick(qint64)));
-    connect(ui->videoPlayer, SIGNAL(leaveFullscreen()), this, SLOT(leaveFullscreen_triggered()));
+
+    // Video player events
+    connect(ui->videoPlayer, SIGNAL(leave_fullscreen()), this, SLOT(leave_fullscreen()));
+    connect(ui->videoPlayer, SIGNAL(double_click()), this, SLOT(toggle_fullscreen()));
 
     // Signals concerning libcow
     connect(this,SIGNAL(prefetch_complete()),this,SLOT(prefetch_complete_triggered()));
@@ -135,6 +138,7 @@ void main_window::setup_playback_buttons()
 
     play_action_ = new player_button(play_icons_, this);
     play_action_->setIconSize(QSize(35,35));
+    play_action_->setShortcut(QString("Space"));
 
     stop_action_ = new player_button(stop_icons_, this);
     stop_action_->setIconSize(QSize(35,35));
@@ -336,6 +340,17 @@ void main_window::set_fullscreen(bool fullscreen)
     ui->actionFullscreen->setChecked(fullscreen);
 }
 
+void main_window::toggle_fullscreen()
+{
+    set_fullscreen(!is_fullscreen());
+}
+
+void main_window::leave_fullscreen()
+{
+    set_fullscreen(false);
+}
+
+
 void main_window::changeEvent(QEvent *e)
 {
     QMainWindow::changeEvent(e);
@@ -427,11 +442,6 @@ void main_window::on_actionPieces_triggered()
 void main_window::on_actionPreferences_triggered()
 {
     settings_dialog_.show();
-}
-
-void main_window::leaveFullscreen_triggered()
-{
-    set_fullscreen(false);
 }
 
 void main_window::media_stateChanged()

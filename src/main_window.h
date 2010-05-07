@@ -33,28 +33,6 @@ protected:
     void closeEvent(QCloseEvent* e);
 
 private:
-    void setup_actions();
-    void setup_ui();
-    void setup_playback_buttons();
-    
-    void load_config_file();
-    void init_client();
-    
-    void stop_playback();
-
-    void reset_session();
-    
-    void on_startup_complete_callback();
-    void on_prefetch_complete_callback(std::vector<int> pieces);
-    
-    void set_fullscreen(bool fullscreen);
-    void set_playback_buttons_disabled(bool state);
-
-    void update_play_pause_button();
-    
-    bool start_download(const libcow::program_info& program_info);
-    void stop_download();
-    
     enum player_state {
         loading,
         buffering,
@@ -63,12 +41,31 @@ private:
         stopped
     };
 
+    void setup_actions();
+    void setup_ui();
+    void setup_playback_buttons();
+    
+    void load_config_file();
+    void init_client();
+
+    void reset_session();
+    std::vector<int> startup_pieces();
+    bool start_download(const libcow::program_info& program_info);
+    void stop_download();
+    
+    void stop_playback();
     player_state get_player_state() const;   
     
-    std::vector<int> startup_pieces();
+    void on_startup_complete_callback();
+    void on_prefetch_complete_callback(std::vector<int> pieces);
     
-    Ui::main_window *ui;
+    void set_playback_buttons_disabled(bool state);
+    void update_play_pause_button();
 
+    bool is_fullscreen() const { return fullscreen_mode_; }
+    
+    Ui::main_window *ui;  
+    
     cow_player::client_configuration config_;
 	
     piece_dialog piece_dialog_;
@@ -95,6 +92,10 @@ private:
     bool stopped_;
     
 private slots:
+    void set_fullscreen(bool fullscreen);
+    void toggle_fullscreen();
+    void leave_fullscreen();
+
     void prefetch_complete_triggered();
     void startup_complete_triggered();
 
@@ -108,7 +109,6 @@ private slots:
     void on_actionPreferences_triggered();
     void on_actionExit_triggered();
     void on_actionAbout_triggered();
-    void leaveFullscreen_triggered();
     void play_action_triggered();
     void stop_action_triggered();
 

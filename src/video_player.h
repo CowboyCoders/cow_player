@@ -13,11 +13,13 @@ public:
     ~video_player();
 
 signals:
-    void leaveFullscreen();
+    void leave_fullscreen();
+    void double_click();
 
 protected:
     void changeEvent(QEvent *e);
     void keyPressEvent(QKeyEvent *e);
+    void mouseDoubleClickEvent(QMouseEvent* e);
 };
 
 #endif // ___video_player_h___

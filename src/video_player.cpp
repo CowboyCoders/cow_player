@@ -27,6 +27,11 @@ void video_player::changeEvent(QEvent *e)
 void video_player::keyPressEvent(QKeyEvent *e)
 {
     if (e->key() == Qt::Key_Escape) {
-        emit leaveFullscreen();
+        emit leave_fullscreen();
     }
+}
+
+void video_player::mouseDoubleClickEvent(QMouseEvent* e)
+{
+    emit double_click();
 }

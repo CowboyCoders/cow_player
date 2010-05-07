@@ -1,6 +1,8 @@
  <!DOCTYPE RCC>
  <RCC version="1.0">
  <qresource>
+     <file>player_icon.png</file>
+     
      <file>pause_disabled.png</file>
      <file>pause_hot.png</file>
      <file>pause_normal.png</file>
