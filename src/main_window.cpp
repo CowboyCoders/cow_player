@@ -265,7 +265,9 @@ bool main_window::start_download(const libcow::program_info& program_info)
         BOOST_LOG_TRIVIAL(error) << "cow_player: could not start program: " << e.what();
 
         std::stringstream ss;
-        ss << "Could not start the program: " << e.what();
+
+        ss << "Could not start the program!\n" << e.what();
+
         emit signal_error_message(QString::fromAscii(ss.str().c_str()));
 
         return false;
