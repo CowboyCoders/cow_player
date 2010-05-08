@@ -22,6 +22,7 @@ select_program_dialog::select_program_dialog(QWidget *parent) :
 
     connect(this,SIGNAL(download_completed(bool,libcow::program_table*)),this,SLOT(handle_download_completed(bool,libcow::program_table*)));
     connect(ui->program_list_,SIGNAL(itemSelectionChanged()),this,SLOT(current_item_changed()));
+    connect(ui->program_list_,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(double_click_received(QListWidgetItem*)));
 }
 
 select_program_dialog::~select_program_dialog()
@@ -84,13 +85,14 @@ void select_program_dialog::handle_download_completed(bool res, libcow::program_
 
 void select_program_dialog::download_list(std::string url, size_t timeout)
 {
-    libcow::program_table* prog_table = new libcow::program_table;
+    libcow::program_table* prog_table = new libcow::program_table; // will be deleted in the slot handle_download_complete
     bool result = false;
     try {
+        std::cout << "loading url " << url << std::endl;
         prog_table->load_from_http(url,timeout);
         result = true;
-    } catch (libcow::exception&) {
-        // Do nothing
+    } catch (libcow::exception& e) {
+        BOOST_LOG_TRIVIAL(warning) << "select_program_dialog: got exception: " << e.what();
     }
 
     emit download_completed(result, prog_table);
@@ -100,6 +102,22 @@ void select_program_dialog::populate_list(size_t timeout)
 {
     show_msg("Connecting to server");
     boost::thread(boost::bind(&select_program_dialog::download_list,this,program_table_url_,timeout));
+}
+
+void select_program_dialog::double_click_received(QListWidgetItem *item)
+{
+    on_buttonBox_accepted();
+}
+
+void select_program_dialog::closeEvent(QCloseEvent *e)
+{
+    std::cout << "Time to close all curl stuff" << std::endl;
+}
+
+void select_program_dialog::on_buttonBox_rejected()
+{
+    std::cout << "Time to reject!" << std::endl;
+    reject();
 }
 
 void select_program_dialog::on_buttonBox_accepted()

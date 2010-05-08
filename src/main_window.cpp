@@ -204,22 +204,13 @@ void main_window::stop_playback()
 {
 #ifdef WIN32
     if (iodevice_) {
-
         media_object_->pause();
         media_object_->seek(0);
-
-
-        /*
-        iodevice_->set_blocking(false);
-        media_object_->stop();
-        iodevice_->set_blocking(true);
-        */
         stopped_ = true;
     }
 #else
     if(iodevice_ && media_source_ && media_object_) {
         media_object_->pause();
-        // std::cout << "managed pause, now seeking" << std::endl;
         media_object_->seek(1);
         stopped_ = true;
     }

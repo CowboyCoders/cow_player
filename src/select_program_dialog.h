@@ -2,6 +2,7 @@
 #define SELECT_PROGRAM_DIALOG_H
 
 #include <QDialog>
+#include <QListWidgetItem>
 
 #include <cow/cow.hpp>
 #include <cow/dispatcher.hpp>
@@ -66,6 +67,7 @@ public:
 
 protected:
     void changeEvent(QEvent *e);
+    void closeEvent(QCloseEvent *e);
 
 private:
     void download_list(std::string url, size_t timeout);
@@ -85,6 +87,8 @@ private:
 
 private slots:
     void on_buttonBox_accepted();
+    void on_buttonBox_rejected();
+    void double_click_received(QListWidgetItem *item);
     void handle_download_completed(bool result, libcow::program_table* program_table);
     void current_item_changed();
 
