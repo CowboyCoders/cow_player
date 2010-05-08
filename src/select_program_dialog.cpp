@@ -88,7 +88,6 @@ void select_program_dialog::download_list(std::string url, size_t timeout)
     libcow::program_table* prog_table = new libcow::program_table; // will be deleted in the slot handle_download_complete
     bool result = false;
     try {
-        std::cout << "loading url " << url << std::endl;
         prog_table->load_from_http(url,timeout);
         result = true;
     } catch (libcow::exception& e) {
