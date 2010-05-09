@@ -12,6 +12,7 @@
 #include <QAction>
 #include <QtGui/QMainWindow>
 #include <QCloseEvent>
+#include <QLabel>
 
 /* phonon with a capital "P" breaks ubuntu make */
 #include <phonon>
@@ -45,6 +46,7 @@ private:
     void setup_actions();
     void setup_ui();
     void setup_playback_buttons();
+    void reset_phonon();
     
     void load_config_file();
     void init_client();
@@ -56,6 +58,9 @@ private:
     
     void stop_playback();
     player_state get_player_state() const;   
+
+    void set_time_text(size_t time, size_t total_time);
+    void update_status_text();
     
     void on_startup_complete_callback();
     void on_prefetch_complete_callback(std::vector<int> pieces);
@@ -66,6 +71,9 @@ private:
     bool is_fullscreen() const { return fullscreen_mode_; }
     
     Ui::main_window *ui;  
+
+    QLabel* status_;
+    QLabel* time_;
     
     cow_player::client_configuration config_;
 	
