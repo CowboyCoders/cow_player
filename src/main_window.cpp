@@ -275,7 +275,7 @@ bool main_window::start_download(const libcow::program_info& program_info)
         download_ctrl_->set_critical_window_timeout(timeout);        
 
         // Pre-buffer
-        download_ctrl_->pre_buffer(startup_pieces(), 
+        download_ctrl_->pre_buffer(startup_chunks(), 
             boost::bind(&main_window::on_prefetch_complete_callback,this,_1));
 
     } catch (libcow::exception& e) {
@@ -290,13 +290,12 @@ bool main_window::start_download(const libcow::program_info& program_info)
     return true;
 }
 
-std::vector<int> main_window::startup_pieces()
+std::vector<libcow::chunk> main_window::startup_chunks()
 {
-    std::vector<int> pieces;
-    for(int i = 0; i < 5; ++i)
-        pieces.push_back(i);
-    pieces.push_back(download_ctrl_->num_pieces()-1);
-    return pieces;
+    std::vector<libcow::chunk> chunks;
+    chunks.push_back(libcow::chunk(0, 2097152)); // prebuffer 2 megs at the beginning
+    chunks.push_back(libcow::chunk(download_ctrl_->file_size() - 2097152, 3097152)); // prebuffer 2 megs at the end
+    return chunks;
 }
 
 void main_window::on_startup_complete_callback()

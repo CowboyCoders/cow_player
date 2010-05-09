@@ -52,7 +52,7 @@ private:
     void init_client();
 
     void reset_session();
-    std::vector<int> startup_pieces();
+    std::vector<libcow::chunk> startup_chunks();
     bool start_download(const libcow::program_info& program_info);
     void stop_download();
     

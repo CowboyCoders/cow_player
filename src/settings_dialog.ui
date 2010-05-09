@@ -152,7 +152,7 @@
      <item>
       <widget class="QLabel" name="critical_window_label_">
        <property name="text">
-        <string>Critical window (pieces)</string>
+        <string>Critical window (bytes)</string>
        </property>
       </widget>
      </item>
@@ -163,7 +163,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>10</width>
+         <width>20</width>
          <height>5</height>
         </size>
        </property>
@@ -171,8 +171,17 @@
      </item>
      <item>
       <widget class="QSpinBox" name="critical_window_spinbox_">
+      <property name="minimumSize">
+          <size>
+              <width>150</width>
+              <height>0</height>
+          </size>
+      </property>
+      <property name="maximum">
+          <number>10485760</number>
+      </property>
        <property name="value">
-        <number>5</number>
+        <number>1048576</number>
        </property>
       </widget>
      </item>
