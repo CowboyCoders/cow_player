@@ -93,12 +93,14 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
         return -1;
     }
 
+    size_t position = pos();
+
     // Prioritize pieces in libcow
-    download_control_->set_playback_position(pos());
+    download_control_->set_playback_position(position);
     
-    bool has_data = download_control_->has_data(pos(), maxlen);
+    bool has_data = download_control_->has_data(position, maxlen);
     BOOST_LOG_TRIVIAL(debug) << "cow_io_device::readData: "
-                             << "pos: " << pos() << " maxlen: "
+                             << "pos: " << position << " maxlen: "
                              << maxlen << " has_data: " << has_data;
     if (!has_data) {
         
@@ -114,15 +116,15 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
             }
             libcow::system::sleep(250);
 
-            if(( download_control_->has_data(pos(), maxlen) )) {
+            if(( download_control_->has_data(position, maxlen) )) {
                 break;
             }
-            BOOST_LOG_TRIVIAL(debug) << "read() MISSING DATA : pos " << pos() 
+            BOOST_LOG_TRIVIAL(debug) << "read() MISSING DATA : pos " << position 
                                      << " : maxlen " << maxlen << " waiting ...." << recheck_count;
 
             if(recheck_count % retry_delay == 0) {
                 // forced request for critical window
-                download_control_->set_playback_position(pos(), true);
+                download_control_->set_playback_position(position, true);
             }
             
             if(recheck_count >= max) {
@@ -136,8 +138,8 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
     }
 
     libcow::utils::buffer buf(data, maxlen);
-    size_t len = download_control_->read_data(pos(), buf);
-    BOOST_LOG_TRIVIAL(debug) << "linux_io_device:read: read len: " << len << " from pos: " << pos() << " with maxlen: " << maxlen;
+    size_t len = download_control_->read_data(position, buf);
+    BOOST_LOG_TRIVIAL(debug) << "linux_io_device:read: read len: " << len << " from pos: " << position << " with maxlen: " << maxlen;
 
     return len;
 }
