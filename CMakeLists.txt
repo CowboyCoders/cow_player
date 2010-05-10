@@ -120,16 +120,6 @@ set(cow_player_INCLUDES
     ${COW_PLAYER_SOURCE_DIR}/../external_libraries/tinyxml/tinyxml.h
 )
 
-IF(WIN32)
-    LIST(APPEND cow_player_SRCS ${COW_PLAYER_SOURCE_DIR}/src/win32/win32_io_device.cpp)
-    LIST(APPEND cow_player_INCLUDES ${COW_PLAYER_SOURCE_DIR}/src/win32/win32_io_device.h)
-ENDIF(WIN32)
-
-IF(UNIX)
-    LIST(APPEND cow_player_SRCS ${COW_PLAYER_SOURCE_DIR}/src/linux/linux_io_device.cpp)
-    LIST(APPEND cow_player_INCLUDES ${COW_PLAYER_SOURCE_DIR}/src/linux/linux_io_device.h)
-ENDIF(UNIX)
-
 set(cow_player_MOCS
     ${COW_PLAYER_SOURCE_DIR}/src/main_window.h
     ${COW_PLAYER_SOURCE_DIR}/src/piece_widget.h
@@ -151,6 +141,16 @@ SET(cow_player_UIS
 )
 
 SET(cow_player_RCCS resources/resources.qrc)
+
+IF(WIN32)
+    LIST(APPEND cow_player_SRCS ${COW_PLAYER_SOURCE_DIR}/src/win32/win32_io_device.cpp)
+    LIST(APPEND cow_player_MOCS ${COW_PLAYER_SOURCE_DIR}/src/win32/win32_io_device.h)
+ENDIF(WIN32)
+
+IF(UNIX)
+    LIST(APPEND cow_player_SRCS ${COW_PLAYER_SOURCE_DIR}/src/linux/linux_io_device.cpp)
+    LIST(APPEND cow_player_INCLUDES ${COW_PLAYER_SOURCE_DIR}/src/linux/linux_io_device.h)
+ENDIF(UNIX)
 
 # generate rules for building source files from the resources
 QT4_ADD_RESOURCES(cow_player_SRCS ${cow_player_RCCS})

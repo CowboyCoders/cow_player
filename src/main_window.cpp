@@ -239,6 +239,8 @@ void main_window::stop_playback()
         stopped_ = true;
     }
 #endif
+
+    update_status_text();
 }
 
 void main_window::reset_session()
@@ -322,8 +324,13 @@ void main_window::prefetch_complete_triggered()
     media_source_ = new Phonon::MediaSource(iodevice_);    
     media_object_->setCurrentSource(*media_source_);
 
+#ifdef WIN32
+    connect(iodevice_, SIGNAL(buffering_state(bool)), this, SLOT(buffering_state(bool)));
+#endif
+
     stopped_ = false;
     media_object_->play();
+    update_status_text();
 }
 
 void main_window::stop_download()
@@ -337,6 +344,10 @@ void main_window::stop_download()
 main_window::player_state main_window::get_player_state() const
 {
     bool buffering = iodevice_ && iodevice_->is_buffering();
+
+    if (buffering) {
+        return main_window::buffering;
+    }
 
     switch(media_object_->state()) {
     case Phonon::LoadingState: return main_window::loading;
@@ -464,7 +475,9 @@ void main_window::set_playback_buttons_disabled(bool state)
 
 void main_window::update_play_pause_button()
 {
-    if (get_player_state() == main_window::playing) {
+    if (get_player_state() == main_window::playing ||
+        get_player_state() == main_window::buffering) 
+    {
         play_action_->set_icon_set(pause_icons_);
     } else {
         play_action_->set_icon_set(play_icons_);
@@ -479,6 +492,16 @@ void main_window::on_actionPieces_triggered()
 void main_window::on_actionPreferences_triggered()
 {
     settings_dialog_.show();
+}
+
+void main_window::buffering_state(bool buffering)
+{
+    if (buffering) {
+        media_object_->pause();
+    } else if(!stopped_) {
+        media_object_->play();
+    }
+    update_status_text();
 }
 
 void main_window::media_stateChanged()
@@ -516,6 +539,7 @@ void main_window::play_action_triggered()
 {
     switch (get_player_state()) {
     case main_window::playing:
+    case main_window::buffering:
         media_object_->pause();
         break;
     case main_window::stopped:

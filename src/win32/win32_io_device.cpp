@@ -97,7 +97,7 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
             buffering_ = true;
         }
 
-        media_object_->pause();
+        emit buffering_state(true);
 
         // Delay * sleep time equals the time 
         int retry_delay = 20; 
@@ -155,7 +155,7 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
             buffering_ = false;
         }
 
-        media_object_->play();
+        emit buffering_state(false);
     }
 
     libcow::utils::buffer buf(data, maxlen);

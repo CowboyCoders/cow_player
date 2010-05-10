@@ -110,6 +110,8 @@ private slots:
     void prefetch_complete_triggered();
     void startup_complete_triggered();
 
+    void buffering_state(bool buffering);
+
     void media_stateChanged();
     void media_finished();
     void media_tick(qint64 time);
