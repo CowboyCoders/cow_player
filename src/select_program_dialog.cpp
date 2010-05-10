@@ -71,16 +71,17 @@ void select_program_dialog::handle_download_completed(bool res, libcow::program_
 {
     assert(pt);
 
-    prog_table_ = *pt;
-    delete pt;
-
     if(res) {
+        prog_table_ = *pt;
         connected_ = true;
         show_list();
     } else {
-        connected_ = false;
-        show_msg("Could not connect to server");
+        if(!connected_) {
+            show_msg("Could not connect to server");
+        }
     }
+
+    delete pt;
 }
 
 void select_program_dialog::download_list(std::string url, size_t timeout)
@@ -110,12 +111,12 @@ void select_program_dialog::double_click_received(QListWidgetItem *item)
 
 void select_program_dialog::closeEvent(QCloseEvent *e)
 {
-    std::cout << "Time to close all curl stuff" << std::endl;
+    connected_ = false; // reset until next show event
 }
 
 void select_program_dialog::on_buttonBox_rejected()
 {
-    std::cout << "Time to reject!" << std::endl;
+    connected_ = false; // reset until next show event
     reject();
 }
 
