@@ -255,12 +255,12 @@ void main_window::stop_playback()
 
 void main_window::reset_session()
 {
+    if (iodevice_ && media_object_) {
 #ifdef WIN32
-    iodevice_->set_blocking(false);
-    media_object_->clear();
-#else
-    media_object_->stop();
+        iodevice_->set_blocking(false);
 #endif
+        media_object_->stop();
+    }
 
     delete iodevice_;
     iodevice_ = 0;
