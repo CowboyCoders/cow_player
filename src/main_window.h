@@ -34,6 +34,7 @@ protected:
     void closeEvent(QCloseEvent* e);
 
 private:
+    // Actual state of the player
     enum player_state {
         loading,
         buffering,
@@ -42,6 +43,12 @@ private:
         stopped
     };
 
+    // Playback state requested by the user
+    enum playback_state {
+        playback_play,
+        playback_stop,
+        playback_pause
+    };
 
     void setup_actions();
     void setup_ui();
@@ -56,7 +63,10 @@ private:
     bool start_download(const libcow::program_info& program_info);
     void stop_download();
     
+    void start_playback();
+    void pause_playback();
     void stop_playback();
+
     player_state get_player_state() const;   
 
     void set_time_text(size_t time, size_t total_time);
@@ -97,8 +107,9 @@ private:
     player_button* play_action_;
     player_button* stop_action_;
 
+    playback_state playback_;
+
     bool fullscreen_mode_;
-    bool stopped_;
     
 private slots:
     void error_message(const QString& msg);

@@ -41,7 +41,7 @@ main_window::main_window(QWidget *parent) :
     audio_output_(0),
     media_source_(0),
     fullscreen_mode_(false),
-    stopped_(false)
+    playback_(playback_stop)
 {
     load_config_file();
 
@@ -217,41 +217,49 @@ void main_window::init_client()
         boost::shared_ptr<libcow::download_device_factory>(
             new libcow::multicast_server_connection_factory()),
         "multicast");
-}
-    
-void main_window::on_actionAbout_triggered()
+}    
+
+void main_window::start_playback()
 {
-    about_dialog_.show();
+    if(iodevice_ && media_object_) {
+        playback_ = playback_play;
+        media_object_->play();
+    }
+
+    update_play_pause_button();
+    update_status_text();
+}
+
+void main_window::pause_playback()
+{
+    if(iodevice_ && media_object_) {
+        playback_ = playback_pause;
+        media_object_->pause();
+    }
+
+    update_play_pause_button();
+    update_status_text();
 }
 
 void main_window::stop_playback()
 {
-#ifdef WIN32
-    if (iodevice_) {
+    if(iodevice_ && media_object_) {
+        playback_ = playback_stop;
         media_object_->pause();
         media_object_->seek(0);
-        stopped_ = true;
     }
-#else
-    if(iodevice_ && media_source_ && media_object_) {
-        media_object_->pause();
-        media_object_->seek(1);
-        stopped_ = true;
-    }
-#endif
 
+    update_play_pause_button();
     update_status_text();
 }
 
 void main_window::reset_session()
 {
-
 #ifdef WIN32
-    stop_playback();
+    iodevice_->set_blocking(false);
     media_object_->clear();
 #else
     media_object_->stop();
-    stopped_ = true;
 #endif
 
     delete iodevice_;
@@ -259,6 +267,8 @@ void main_window::reset_session()
 
     delete media_source_;
     media_source_ = 0;
+
+    stop_playback();
 }
 
 bool main_window::start_download(const libcow::program_info& program_info)
@@ -328,9 +338,7 @@ void main_window::prefetch_complete_triggered()
     connect(iodevice_, SIGNAL(buffering_state(bool)), this, SLOT(buffering_state(bool)));
 #endif
 
-    stopped_ = false;
-    media_object_->play();
-    update_status_text();
+    start_playback();
 }
 
 void main_window::stop_download()
@@ -353,10 +361,8 @@ main_window::player_state main_window::get_player_state() const
     case Phonon::LoadingState: return main_window::loading;
     case Phonon::PlayingState: return main_window::playing;
     case Phonon::PausedState:
-        if (stopped_) {
+        if (playback_ == playback_stop) {
             return main_window::stopped;
-        } else if (buffering) {
-            return main_window::buffering;
         } else {
             return main_window::paused;
         }
@@ -409,20 +415,22 @@ void main_window::closeEvent(QCloseEvent* e)
         iodevice_->set_blocking(false);
         media_object_->stop();
         iodevice_->close();
-
-        iodevice_ = 0;
-        media_source_ = 0;
     }
 #endif
 
     // Save configuration
 	try {
         config_.save(config_filename);
-    } catch (cow_player::configuration::exceptions::save_config_error e) {
+    } catch (cow_player::configuration::exceptions::save_config_error&) {
         BOOST_LOG_TRIVIAL(warning) << "cow_player: could not save config file!";
 	}
 
     e->accept();
+}
+
+void main_window::on_actionAbout_triggered()
+{
+    about_dialog_.show();
 }
 
 void main_window::on_actionExit_triggered()
@@ -498,9 +506,10 @@ void main_window::buffering_state(bool buffering)
 {
     if (buffering) {
         media_object_->pause();
-    } else if(!stopped_) {
+    } else if(playback_ == playback_play) {
         media_object_->play();
     }
+    update_play_pause_button();
     update_status_text();
 }
 
@@ -508,13 +517,8 @@ void main_window::media_stateChanged()
 {
     switch(media_object_->state()) {
         case Phonon::PlayingState:
-            if (stopped_) {
-                // Ugly hack, does it even work?
-                media_object_->pause();
-            } else {
-                // Triggered first time when going from loading to playing
-                set_playback_buttons_disabled(false);
-            }
+            // Triggered first time when going from loading to playing
+            set_playback_buttons_disabled(false);
             break;
         case Phonon::ErrorState:
             BOOST_LOG_TRIVIAL(error) << "Media object error: " << media_object_->errorString().toAscii().data();
@@ -540,12 +544,11 @@ void main_window::play_action_triggered()
     switch (get_player_state()) {
     case main_window::playing:
     case main_window::buffering:
-        media_object_->pause();
+        pause_playback();
         break;
     case main_window::stopped:
     case main_window::paused:
-        stopped_ = false;
-        media_object_->play();
+        start_playback();
         break;
     }
 }
