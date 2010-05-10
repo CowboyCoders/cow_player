@@ -52,6 +52,9 @@ qint64 cow_io_device::size() const
 
 bool cow_io_device::seek(qint64 pos)
 {
+    if(check_for_shutdown()) {
+        return false;
+    }
     BOOST_LOG_TRIVIAL(debug) << "seek() : offset " << pos;
     BOOST_LOG_TRIVIAL(debug) << "file size: " << size_;
     if(pos >= size_) {
@@ -63,6 +66,9 @@ bool cow_io_device::seek(qint64 pos)
 
 qint64 cow_io_device::bytesAvailable() const
 {
+    if(check_for_shutdown()) {
+        return 0;
+    }
     qint64 len = QIODevice::bytesAvailable(); 
     BOOST_LOG_TRIVIAL(debug) << "bytesAvailable() : result " << len;
     return len; 
@@ -128,7 +134,8 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
             }
             
             if(recheck_count >= max) {
-                BOOST_LOG_TRIVIAL(warning) << "linux_io_device: couldn't get any data!";
+                BOOST_LOG_TRIVIAL(warning) << "linux_io_device: couldn't get any data, terminating the io_device!";
+                shutdown();
                 return -1;
             }
             ++recheck_count;
