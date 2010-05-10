@@ -11,6 +11,7 @@
 
 class cow_io_device : public QIODevice, public boost::noncopyable
 {
+    Q_OBJECT
 public:
     cow_io_device(Phonon::MediaObject* media_object, libcow::download_control* download_control);
     ~cow_io_device();
@@ -40,6 +41,9 @@ private:
 
     mutable boost::mutex buffering_mutex_;
     mutable boost::mutex blocking_mutex_;
+
+signals:
+    void buffering_state(bool buffering);
 
 };
 
