@@ -82,12 +82,14 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
         return -1;
     }
 
+    size_t position = pos();
+
     // Prioritize pieces in libcow
-    download_control_->set_playback_position(pos());
+    download_control_->set_playback_position(position);
     
-    bool has_data = download_control_->has_data(pos(), maxlen);
+    bool has_data = download_control_->has_data(position, maxlen);
     BOOST_LOG_TRIVIAL(debug) << "cow_io_device::readData: "
-                             << "pos: " << pos() << " maxlen: "
+                             << "pos: " << position << " maxlen: "
                              << maxlen << " has_data: " << has_data;
 
     if (!has_data) {
@@ -131,20 +133,20 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
             libcow::system::sleep(50);
 
             // Check again if the data has arrived
-            done = download_control_->has_data(pos(), maxlen);
+            done = download_control_->has_data(position, maxlen);
 
             // If we still aren't done and haven't been so for quite some time
             // it is time to force another piece request
             if(!done && ++retry_counter >= retry_delay) {
                 // forced request for critical window
-                download_control_->set_playback_position(pos(), true);
+                download_control_->set_playback_position(position, true);
                 // Increase delay
                 retry_delay = (std::min)(retry_delay+10, retry_delay_max);
                 // Reset counter
                 retry_counter = 0;
             }            
 
-            BOOST_LOG_TRIVIAL(debug) << "read() MISSING DATA : pos " << pos() << " : maxlen " << maxlen << " waiting ...." << iter;
+            BOOST_LOG_TRIVIAL(debug) << "read() MISSING DATA : pos " << position << " : maxlen " << maxlen << " waiting ...." << iter;
 
             // Increment iterator counter
             ++iter;
@@ -159,9 +161,9 @@ qint64 cow_io_device::readData(char *data, qint64 maxlen)
     }
 
     libcow::utils::buffer buf(data, maxlen);
-    size_t len = download_control_->read_data(pos(), buf);
+    size_t len = download_control_->read_data(position, buf);
 
-    BOOST_LOG_TRIVIAL(debug) << "read() : pos " << pos() << " : maxlen " << maxlen << " : len " << len;
+    BOOST_LOG_TRIVIAL(debug) << "read() : pos " << position << " : maxlen " << maxlen << " : len " << len;
 
     return len;
 }
