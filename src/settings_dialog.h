@@ -3,6 +3,7 @@
 
 #include <string>
 #include <QDialog>
+#include <QShowEvent>
 #include <cow/cow.hpp>
 #include "client_configuration.h"
 
@@ -19,16 +20,17 @@ public:
     void set_configuration(cow_player::client_configuration *conf)
     {
         conf_ = conf;
-        set_init_values();
+        load_values();
     }
 
 
 protected:
     void changeEvent(QEvent *e);
+    void showEvent(QShowEvent *e); 
 
 private:
     void setup_connections();
-    void set_init_values();
+    void load_values();
     std::string qstring_to_std(QString qstr);
     Ui::settings_dialog *ui;
 
@@ -36,6 +38,7 @@ private:
 
 private slots:
     void ok_button_clicked();
+    void cancel_button_clicked();
     void select_download_dir_clicked();
 };
 
