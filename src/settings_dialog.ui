@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>410</width>
+    <width>416</width>
     <height>272</height>
    </rect>
   </property>
@@ -137,6 +137,9 @@
          <height>0</height>
         </size>
        </property>
+       <property name="minimum">
+        <number>1024</number>
+       </property>
        <property name="maximum">
         <number>65535</number>
        </property>
@@ -152,7 +155,7 @@
      <item>
       <widget class="QLabel" name="critical_window_label_">
        <property name="text">
-        <string>Critical window (bytes)</string>
+        <string>Critical window (KiB)</string>
        </property>
       </widget>
      </item>
@@ -171,17 +174,20 @@
      </item>
      <item>
       <widget class="QSpinBox" name="critical_window_spinbox_">
-      <property name="minimumSize">
-          <size>
-              <width>150</width>
-              <height>0</height>
-          </size>
-      </property>
-      <property name="maximum">
-          <number>10485760</number>
-      </property>
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>999999999</number>
+       </property>
        <property name="value">
-        <number>1048576</number>
+        <number>1024</number>
        </property>
       </widget>
      </item>

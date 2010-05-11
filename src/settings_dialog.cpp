@@ -17,7 +17,7 @@ settings_dialog::settings_dialog(QWidget *parent) :
     setup_connections();
 }
 
-void settings_dialog::set_init_values()
+void settings_dialog::load_values()
 {
     ui->timeout_spinbox_->setValue(conf_->get_critical_window_timeout());
     ui->bt_port_spinbox_->setValue(conf_->get_bittorrent_port());
@@ -29,7 +29,7 @@ void settings_dialog::set_init_values()
 void settings_dialog::setup_connections()
 {
     connect(ui->button_box_,SIGNAL(accepted()),this,SLOT(ok_button_clicked()));
-    connect(ui->button_box_,SIGNAL(rejected()),this,SLOT(reject()));
+    connect(ui->button_box_,SIGNAL(rejected()),this,SLOT(cancel_button_clicked()));
     connect(ui->download_dir_button_,SIGNAL(clicked()),this,SLOT(select_download_dir_clicked()));
 }
 
@@ -50,12 +50,22 @@ void settings_dialog::changeEvent(QEvent *e)
     }
 }
 
+void settings_dialog::showEvent(QShowEvent *event)
+{
+    load_values();
+}
+
 std::string settings_dialog::qstring_to_std(QString qstr)
 {
     QByteArray ba = qstr.toLatin1();
     std::string str = ba.data();
 
     return str;
+}
+
+void settings_dialog::cancel_button_clicked()
+{
+    reject();
 }
 
 void settings_dialog::ok_button_clicked()
