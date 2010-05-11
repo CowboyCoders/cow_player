@@ -61,19 +61,19 @@ std::string settings_dialog::qstring_to_std(QString qstr)
 void settings_dialog::ok_button_clicked()
 {
     int timeout = ui->timeout_spinbox_->value();
-    conf_->set_property("critical_window_timeout",timeout);
+    conf_->set_critical_window_timeout(timeout);
     
     int bt_port = ui->bt_port_spinbox_->value();
-    conf_->set_property("bittorrent_port",bt_port);
+    conf_->set_bittorrent_port(bt_port);
 
     int critical_window = ui->critical_window_spinbox_->value();
-    conf_->set_property("critical_window",critical_window);
+    conf_->set_critical_window(critical_window);
 
     std::string url = qstring_to_std(ui->program_server_url_line_->text());
-    conf_->set_property("program_table_url",url);
+    conf_->set_program_table_url(url);
     
     std::string dir = qstring_to_std(ui->download_dir_line_->text());
-    conf_->set_property("download_dir",dir);
+    conf_->set_download_dir(dir);
     
     accept();
 }

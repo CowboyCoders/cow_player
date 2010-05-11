@@ -1,9 +1,9 @@
 #include "configuration.h"
 #include "tinyxml.h"
 
-const std::string configuration_property_tag_name = "property";
-const std::string configuration_property_name_attribute = "name";
-const std::string configuration_property_type_attribute = "type";
+static const std::string configuration_property_tag_name = "property";
+static const std::string configuration_property_name_attribute = "name";
+static const std::string configuration_property_type_attribute = "type";
 
 using namespace cow_player::configuration;
 

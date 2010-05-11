@@ -166,7 +166,7 @@ public:
     {
         try {
             return boost::lexical_cast<int>(prop_value);
-        } catch (boost::bad_lexical_cast) {
+        } catch (boost::bad_lexical_cast&) {
             throw exceptions::conversion_error("Failed to convert data to a integer value.");
         }
     }
@@ -199,16 +199,16 @@ public:
     {
         try {
             return boost::lexical_cast<bool>(prop_value);
-        } catch (boost::bad_lexical_cast) {
+        } catch (boost::bad_lexical_cast&) {
             throw exceptions::conversion_error("Failed to convert data to a boolean value.");
         }
     }
 };
 
+
 #define CONFIGURATION_PROPERTY(name, type, default_value) \
     void set_##name(type value) { set_property(#name, value); } \
     type get_##name() const { return get_property<type>(#name, default_value); }
-
 
 
 
@@ -228,6 +228,8 @@ public:
     * @param fileName The file to load settings from.
     */
     base_configuration(const std::string& fileName);
+
+    virtual ~base_configuration() {}
 
    /**
     * Load a configuration from a file.
@@ -267,7 +269,7 @@ public:
 
         try {
             return serializer<T>::deserialize(item->second.second);
-        } catch (exceptions::conversion_error) {
+        } catch (exceptions::conversion_error&) {
             return default_value;
         }
     }

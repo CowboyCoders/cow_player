@@ -49,6 +49,7 @@ public:
     */
     client_configuration(const std::string& fileName) 
         : configuration::base_configuration(fileName) {}
+    
 
    /**
     * A configuration property for setting fullscreen mode.
@@ -76,8 +77,9 @@ public:
     * A configuration property for setting the timeout of a piece in the critical window
     */
     CONFIGURATION_PROPERTY(critical_window_timeout, int, 3000);
-};
 
+};
+    
 }
 
 #endif // ___client_configuration_h___
