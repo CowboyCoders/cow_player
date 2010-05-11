@@ -21,7 +21,7 @@ void settings_dialog::load_values()
 {
     ui->timeout_spinbox_->setValue(conf_->get_critical_window_timeout());
     ui->bt_port_spinbox_->setValue(conf_->get_bittorrent_port());
-    ui->critical_window_spinbox_->setValue(conf_->get_critical_window());
+    ui->critical_window_spinbox_->setValue(conf_->get_critical_window()/1024); // display in KiB
     ui->program_server_url_line_->setText(QString(conf_->get_program_table_url().c_str()));
     ui->download_dir_line_->setText(QString(conf_->get_download_dir().c_str()));
 }
@@ -77,7 +77,7 @@ void settings_dialog::ok_button_clicked()
     conf_->set_bittorrent_port(bt_port);
 
     int critical_window = ui->critical_window_spinbox_->value();
-    conf_->set_critical_window(critical_window);
+    conf_->set_critical_window(critical_window*1024); // set_critical_window wants bytes
 
     std::string url = qstring_to_std(ui->program_server_url_line_->text());
     conf_->set_program_table_url(url);
