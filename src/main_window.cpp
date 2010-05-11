@@ -145,7 +145,7 @@ void main_window::reset_phonon()
 
     // Phonon events
     connect(media_object_, SIGNAL(stateChanged(Phonon::State, Phonon::State)), this, SLOT(media_stateChanged()));
-    connect(media_object_, SIGNAL(finished ()), this, SLOT(media_finished()));
+    connect(media_object_, SIGNAL(finished()), this, SLOT(media_finished()));
     connect(media_object_, SIGNAL(tick(qint64)), this, SLOT(media_tick(qint64)));
 
     // Connect gauges
@@ -189,7 +189,7 @@ void main_window::load_config_file()
 {
 	try {
         config_.load(config_filename);
-	} catch (cow_player::configuration::exceptions::load_config_error e) {
+	} catch (cow_player::configuration::exceptions::load_config_error& e) {
         BOOST_LOG_TRIVIAL(warning) << "cow_player: main_window: could not load config file "
                                    << config_filename;
         BOOST_LOG_TRIVIAL(warning) << "cow_player: load config error was: " << e.what();
@@ -243,8 +243,9 @@ void main_window::pause_playback()
 
 void main_window::stop_playback()
 {
+    playback_ = playback_stop;
+
     if(iodevice_ && media_object_) {
-        playback_ = playback_stop;
         media_object_->pause();
         media_object_->seek(0);
     }
@@ -271,6 +272,7 @@ void main_window::reset_session()
     stop_playback();
 }
 
+// Warning this method runs in its own thread
 bool main_window::start_download(const libcow::program_info& program_info)
 {
     try {
@@ -335,6 +337,7 @@ void main_window::prefetch_complete_triggered()
     media_object_->setCurrentSource(*media_source_);
 
 #ifdef WIN32
+    // This signal is not implemented in the linux device AFAIK
     connect(iodevice_, SIGNAL(buffering_state(bool)), this, SLOT(buffering_state(bool)));
 #endif
 
@@ -411,7 +414,7 @@ void main_window::closeEvent(QCloseEvent* e)
     about_dialog_.hide();
 
 #ifdef WIN32
-    if (iodevice_) {
+    if (iodevice_ && media_object_) {
         iodevice_->set_blocking(false);
         media_object_->stop();
         iodevice_->close();
@@ -504,10 +507,13 @@ void main_window::on_actionPreferences_triggered()
 
 void main_window::buffering_state(bool buffering)
 {
-    if (buffering) {
-        media_object_->pause();
-    } else if(playback_ == playback_play) {
-        media_object_->play();
+    assert(media_object_);
+    if (media_object_) {
+        if (buffering) {
+            media_object_->pause();
+        } else if(playback_ == playback_play) {
+            media_object_->play();
+        }
     }
     update_play_pause_button();
     update_status_text();
@@ -588,5 +594,6 @@ void main_window::update_status_text()
 
 void main_window::media_tick(qint64 time)
 {
+    assert(media_object_);
     set_time_text(time, media_object_->totalTime());
 }
