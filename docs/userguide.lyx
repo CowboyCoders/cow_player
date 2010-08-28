@@ -1,0 +1,610 @@
+#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman newcent
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize 10
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 0
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Cowplayer User Guide
+\end_layout
+
+\begin_layout Author
+Cowboy Coders
+\end_layout
+
+\begin_layout Section
+About this document
+\end_layout
+
+\begin_layout Standard
+This document is aimed at end users of the Cowplayer proof of concept demo
+ client.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename /home/henrik/Desktop/cowplayer-dumpar/screenshot-mainwindow-201005.png
+	lyxscale 25
+	width 12cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Main player window
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Basic tasks
+\end_layout
+
+\begin_layout Subsection
+Selecting a program
+\end_layout
+
+\begin_layout Standard
+Using the 
+\begin_inset Quotes eld
+\end_inset
+
+File
+\begin_inset Quotes erd
+\end_inset
+
+ menu, select the option 
+\begin_inset Quotes eld
+\end_inset
+
+Show program list...
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This will open the program selection window.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename /home/henrik/Desktop/cowplayer-dumpar/screenshot-programselect-201005.png
+	lyxscale 25
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Program selection window
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Select a program and click 
+\begin_inset Quotes eld
+\end_inset
+
+Ok
+\begin_inset Quotes erd
+\end_inset
+
+.
+ To abort, press 
+\begin_inset Quotes eld
+\end_inset
+
+Cancel
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Regardless of choice, the program selection window will close.
+\end_layout
+
+\begin_layout Subsection
+Controlling program playback
+\end_layout
+
+\begin_layout Standard
+Selecting a program will start playback as soon as sufficient data is available.
+\end_layout
+
+\begin_layout Standard
+Clicking the 
+\begin_inset Quotes eld
+\end_inset
+
+Pause
+\begin_inset Quotes erd
+\end_inset
+
+ button will pause playback.
+\end_layout
+
+\begin_layout Standard
+Clicking the 
+\begin_inset Quotes eld
+\end_inset
+
+Stop
+\begin_inset Quotes erd
+\end_inset
+
+ button will stop playback and return the position indicator to the start
+ of the program.
+\end_layout
+
+\begin_layout Standard
+Fullscreen mode is engaged by selecting the 
+\begin_inset Quotes eld
+\end_inset
+
+Fullscreen
+\begin_inset Quotes erd
+\end_inset
+
+ option in the 
+\begin_inset Quotes eld
+\end_inset
+
+Options
+\begin_inset Quotes erd
+\end_inset
+
+ menu.
+ To exit fullscreen mode, press the Esc key.
+\end_layout
+
+\begin_layout Standard
+You can change the playback position by clicking on the playback position
+ indicator at the bottom of the window, or dragging the indicator handle
+ forwards or backwards.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Inspecting download sources
+\end_layout
+
+\begin_layout Standard
+To view the download source visualization, select the 
+\begin_inset Quotes eld
+\end_inset
+
+Show pieces...
+\begin_inset Quotes erd
+\end_inset
+
+ item in the Options menu.
+\end_layout
+
+\begin_layout Standard
+Hovering your mouse pointer over a piece indicator of the grid will show
+ more detailed information regarding that particular piece.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename /home/henrik/Desktop/cowplayer-dumpar/screenshot-pieceinfo-201005.png
+	lyxscale 25
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Download source visualization
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Configuration via GUI
+\end_layout
+
+\begin_layout Standard
+To open the preferences window, select Edit->Preferences in the top menu.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename /home/henrik/Desktop/cowplayer-dumpar/screenshot-preferences-201005.png
+	lyxscale 25
+	width 8cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Preferences
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+Program
+\begin_inset Formula $\,$
+\end_inset
+
+server
+\begin_inset Formula $\,$
+\end_inset
+
+URL URL to program table XML file.
+ Defaults to the cowboycoders server.
+\end_layout
+
+\begin_layout Description
+Download
+\begin_inset Formula $\,$
+\end_inset
+
+directory Local directory in which programs are stored after and during
+ download.
+\end_layout
+
+\begin_layout Description
+Bittorrent
+\begin_inset Formula $\,$
+\end_inset
+
+port Network port for BitTorrent traffic.
+\end_layout
+
+\begin_layout Description
+Critical
+\begin_inset Formula $\,$
+\end_inset
+
+window Number of pieces directly following the playback position eligible
+ for on-demand download.
+\end_layout
+
+\begin_layout Description
+Critical
+\begin_inset Formula $\,$
+\end_inset
+
+window
+\begin_inset Formula $\,$
+\end_inset
+
+timeout Time until on-demand download of pieces in the critical window.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Advanced tasks
+\end_layout
+
+\begin_layout Subsection
+Manual configuration
+\end_layout
+
+\begin_layout Standard
+Cowplayer is configured using and XML file called 
+\begin_inset Quotes eld
+\end_inset
+
+cow_player_config.xml
+\begin_inset Quotes erd
+\end_inset
+
+ which is situated in the same directory as the cow_player binary.
+\end_layout
+
+\begin_layout Standard
+Using this file you can change the bittorrent port, download target directory
+ and which program table server to use.
+ The format is as follows.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<info>
+\end_layout
+
+\begin_layout Plain Layout
+
+<property name="bittorrent_port" type="int">
+\end_layout
+
+\begin_layout Plain Layout
+
+55678
+\end_layout
+
+\begin_layout Plain Layout
+
+</property>
+\end_layout
+
+\begin_layout Plain Layout
+
+<property name="download_dir" type="path">
+\end_layout
+
+\begin_layout Plain Layout
+
+.
+\end_layout
+
+\begin_layout Plain Layout
+
+</property>
+\end_layout
+
+\begin_layout Plain Layout
+
+<property name="program_table_url" type="url">
+\end_layout
+
+\begin_layout Plain Layout
+
+    cowboycoders.se/program_table.xml
+\end_layout
+
+\begin_layout Plain Layout
+
+</property>
+\end_layout
+
+\begin_layout Plain Layout
+
+</info>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Command line tools
+\end_layout
+
+\begin_layout Subsubsection
+Multicast server
+\end_layout
+
+\begin_layout Standard
+The multicast server streams a program to a specific multicast group and
+ port.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+multicast_server <file path> <program id> <bitrate> <ip address> <port>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+There are no optional parameters.
+\end_layout
+
+\begin_layout Standard
+File path is the local path to the file to stream.
+\end_layout
+
+\begin_layout Standard
+The program id is the numerical program identifier of the program to stream.
+\end_layout
+
+\begin_layout Standard
+Bitrate is the send bitrate, it must not necessarily be the bitrate of the
+ movie unless realtime playback on the client end is the goal.
+\end_layout
+
+\begin_layout Standard
+IP address is the ip address of the target multicast group.
+\end_layout
+
+\begin_layout Standard
+Port is the port number for transmission.
+\end_layout
+
+\begin_layout Subsubsection
+On-demand server
+\end_layout
+
+\begin_layout Standard
+The on-demand server is a server that implements a subset of the HTTP protocol.
+ It is started with the following parameters, none of which is optional.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+on_demand_server <ip address> <port> <document root>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+IP address is the address on which the server shall listen.
+\end_layout
+
+\begin_layout Standard
+Port is the port on which the server shall listen.
+\end_layout
+
+\begin_layout Standard
+Document root is the root directory from which the server serves files.
+ No files outside of the root directory will be available to clients.
+\end_layout
+
+\end_body
+\end_document
